@@ -1,0 +1,9 @@
+[package]
+name = "cgraphics"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+eframe = "0.31.1"
+egui_extras = "0.31.1"
+nalgebra = "0.33.2"
