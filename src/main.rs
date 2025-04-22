@@ -1,6 +1,11 @@
+use camera::Camera;
 use eframe::egui::{self, Rgba};
+use renderer::Ray;
+use scene::Scene;
+mod camera;
 mod intersect;
 mod renderer;
+mod scene;
 mod sphere;
 
 fn main() -> eframe::Result {
@@ -10,7 +15,7 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
     eframe::run_native(
-        "My egui App",
+        "renderer",
         options,
         Box::new(|_| {
             // This gives us image support:
@@ -21,6 +26,8 @@ fn main() -> eframe::Result {
 
 struct RenderApp {
     buffer: Vec<Vec<Rgba>>,
+    camera: Camera,
+    scene: Scene<sphere::Sphere>,
 }
 
 impl Default for RenderApp {
@@ -30,14 +37,31 @@ impl Default for RenderApp {
             .collect::<Vec<Rgba>>();
 
         let buffer = (0..500).map(|_| row.clone()).collect::<Vec<Vec<Rgba>>>();
-        RenderApp { buffer }
+
+        let ray_location = nalgebra::Vector3::new(-3.0, 0.0, 0.0);
+        let ray_direction = nalgebra::Vector3::new(0.75, 0.0, 0.1);
+        let origin_ray = Ray::new(ray_location, ray_direction);
+
+        println!("{:?}", origin_ray);
+
+        let camera = Camera {
+            location: origin_ray,
+            width: 500,
+            height: 500,
+        };
+
+        RenderApp {
+            buffer,
+            camera,
+            scene: Scene::<sphere::Sphere>::new_test(),
+        }
     }
 }
 
 impl eframe::App for RenderApp {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            self.update_buffer();
+            self.update_buffer_sharedstate();
             let img =
                 egui_extras::image::RetainedImage::from_color_image("text", self.buffer_to_image());
             img.show(ui);
@@ -73,5 +97,9 @@ impl RenderApp {
                 //self.buffer[x][y] = renderer::coordinates(x_normalised, y_normalised);
             }
         }
+    }
+
+    fn update_buffer_sharedstate(&mut self) {
+        self.buffer = self.camera.create_buffer(&self.scene);
     }
 }
