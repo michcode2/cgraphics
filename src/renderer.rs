@@ -119,6 +119,10 @@ impl Ray {
         }
     }
 
+    pub fn new_preserve(origin: Vector3<f32>, direction: Vector3<f32>) -> Ray {
+        Ray { direction, origin }
+    }
+
     pub fn at_point(&self, t: f32) -> Vector3<f32> {
         self.origin + (self.direction * t)
     }

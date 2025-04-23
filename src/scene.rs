@@ -35,15 +35,16 @@ impl<T: Intersect> Scene<T> {
     pub fn new_test() -> Scene<Sphere> {
         let mut objects = vec![];
 
-        objects.push(Sphere {
-            origin: nalgebra::Vector3::new(3.0, 1.5, 3.0),
-            radius: 0.75,
-        });
+        let num_balls = 750;
+        let extent = 10.0;
 
-        objects.push(Sphere {
-            origin: nalgebra::Vector3::new(3.0, -3.0, 0.0),
-            radius: 0.5,
-        });
+        for i in 0..num_balls {
+            let y = -extent + (i as f32 * extent * 2.0 / num_balls as f32);
+            objects.push(Sphere {
+                origin: nalgebra::Vector3::new(3.0, y, 2.0 * (y).sin() + 0.1 * y.powi(2)),
+                radius: 0.1,
+            });
+        }
 
         Scene { objects }
     }

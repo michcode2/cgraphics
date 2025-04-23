@@ -1,5 +1,5 @@
 use camera::Camera;
-use eframe::egui::{self, Rgba};
+use eframe::egui::{self, Key, Rgba};
 use renderer::Ray;
 use scene::Scene;
 mod camera;
@@ -11,7 +11,7 @@ mod sphere;
 fn main() -> eframe::Result {
     println!("Hello, world!");
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size([520.0, 520.0]),
+        viewport: egui::ViewportBuilder::default().with_inner_size([820.0, 820.0]),
         ..Default::default()
     };
     eframe::run_native(
@@ -32,22 +32,23 @@ struct RenderApp {
 
 impl Default for RenderApp {
     fn default() -> Self {
-        let row = (0..500)
+        let width = 800;
+        let height = 800;
+
+        let row = (0..height)
             .map(|_| Rgba::from_gray(0.0))
             .collect::<Vec<Rgba>>();
 
-        let buffer = (0..500).map(|_| row.clone()).collect::<Vec<Vec<Rgba>>>();
+        let buffer = (0..width).map(|_| row.clone()).collect::<Vec<Vec<Rgba>>>();
 
-        let ray_location = nalgebra::Vector3::new(-3.0, 0.0, 0.0);
-        let ray_direction = nalgebra::Vector3::new(0.75, 0.0, 0.1);
-        let origin_ray = Ray::new(ray_location, ray_direction);
-
-        println!("{:?}", origin_ray);
+        let ray_location = nalgebra::Vector3::new(-10.0, 0.0, 0.0);
+        let ray_direction = nalgebra::Vector3::new(1.0, 0.0, 0.0);
+        let origin_ray = Ray::new_preserve(ray_location, ray_direction);
 
         let camera = Camera {
             location: origin_ray,
-            width: 500,
-            height: 500,
+            width,
+            height,
         };
 
         RenderApp {
@@ -65,6 +66,52 @@ impl eframe::App for RenderApp {
             let img =
                 egui_extras::image::RetainedImage::from_color_image("text", self.buffer_to_image());
             img.show(ui);
+
+            ctx.input(|inputs| {
+                for pressed in &inputs.keys_down {
+                    match pressed {
+                        Key::W => self.camera.location.origin.x += 0.1,
+                        Key::S => self.camera.location.origin.x -= 0.1,
+                        Key::A => self.camera.location.origin.y -= 0.1,
+                        Key::D => self.camera.location.origin.y += 0.1,
+                        Key::Z => self.camera.location.origin.z += 0.1,
+                        Key::X => self.camera.location.origin.z -= 0.1,
+                        Key::ArrowLeft => {
+                            let x = self.camera.location.direction.x;
+                            let y = self.camera.location.direction.y;
+
+                            let theta = y.atan2(x);
+                            let r = (x.powi(2) + y.powi(2)).sqrt();
+
+                            let theta_1 = theta - 0.01;
+
+                            let x_1 = theta_1.cos() * r;
+                            let y_1 = theta_1.sin() * r;
+
+                            self.camera.location.direction.x = x_1;
+                            self.camera.location.direction.y = y_1;
+                            println!("{:?}", self.camera.location.direction);
+                        }
+                        Key::ArrowRight => {
+                            let x = self.camera.location.direction.x;
+                            let y = self.camera.location.direction.y;
+
+                            let theta = y.atan2(x);
+                            let r = (x.powi(2) + y.powi(2)).sqrt();
+
+                            let theta_1 = theta + 0.01;
+
+                            let x_1 = theta_1.cos() * r;
+                            let y_1 = theta_1.sin() * r;
+
+                            self.camera.location.direction.x = x_1;
+                            self.camera.location.direction.y = y_1;
+                            println!("{:?}", self.camera.location.direction);
+                        }
+                        _ => (),
+                    }
+                }
+            });
         });
     }
 }
