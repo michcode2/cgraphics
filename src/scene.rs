@@ -6,11 +6,12 @@ use crate::{
     sphere::Sphere,
 };
 
-pub struct Scene<T: Intersect> {
+#[derive(Clone)]
+pub struct Scene<T: Intersect + Clone> {
     objects: Vec<T>,
 }
 
-impl<T: Intersect> Scene<T> {
+impl<T: Intersect + Clone> Scene<T> {
     pub fn test_intersections(&self, ray: Ray) -> Intersection {
         let mut all_objects = self
             .objects
@@ -35,14 +36,14 @@ impl<T: Intersect> Scene<T> {
     pub fn new_test() -> Scene<Sphere> {
         let mut objects = vec![];
 
-        let num_balls = 750;
+        let num_balls = 50000;
         let extent = 10.0;
 
         for i in 0..num_balls {
             let y = -extent + (i as f32 * extent * 2.0 / num_balls as f32);
             objects.push(Sphere {
                 origin: nalgebra::Vector3::new(3.0, y, 2.0 * (y).sin() + 0.1 * y.powi(2)),
-                radius: 0.1,
+                radius: 0.05,
             });
         }
 

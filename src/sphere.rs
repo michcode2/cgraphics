@@ -6,6 +6,7 @@ use crate::{
     renderer::Ray,
 };
 
+#[derive(Clone, Copy)]
 pub struct Sphere {
     pub origin: nalgebra::Vector3<f32>,
     pub radius: f32,

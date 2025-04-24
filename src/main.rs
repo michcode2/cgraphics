@@ -147,6 +147,7 @@ impl RenderApp {
     }
 
     fn update_buffer_sharedstate(&mut self) {
-        self.buffer = self.camera.create_buffer(&self.scene);
+        self.buffer = self.camera.create_buffer_parallel(self.scene.clone());
+        //self.buffer = self.camera.create_buffer(&self.scene);
     }
 }
