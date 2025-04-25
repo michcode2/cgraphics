@@ -1,12 +1,12 @@
 use std::{
-    sync::{Arc, Mutex, RwLock},
+    sync::{Arc, RwLock},
     thread,
 };
 
 use eframe::egui::Rgba;
 
 use crate::{
-    renderer::{many_spheres, Ray},
+    renderer::Ray,
     scene::Scene,
 };
 

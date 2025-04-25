@@ -14,7 +14,7 @@ pub struct Sphere {
 
 #[allow(non_snake_case)]
 impl Intersect for Sphere {
-    fn test_intersection(&self, ray: &Ray) -> Intersection {
+    fn test_intersection(&self, ray: &Ray, depth: u8) -> Intersection {
         let L = self.origin - ray.origin;
         let t_ca = L.dot(&ray.direction);
 
@@ -33,7 +33,7 @@ impl Intersect for Sphere {
         let normal = self.origin - surface;
         let normal = normal / normal.norm();
 
-        if distance < self.radius {
+        if distance < self.radius && depth < 3 {
             return Intersection::new(Rgba::from_rgb(normal.x, normal.y, normal.z), Some(distance));
         }
         return Intersection::new(Rgba::from_gray(background), None);

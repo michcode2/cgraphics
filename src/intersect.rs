@@ -1,9 +1,9 @@
 use eframe::egui::Rgba;
 
-use crate::{renderer::Ray, sphere};
+use crate::{light, renderer::Ray, sphere};
 
 pub trait Intersect {
-    fn test_intersection(&self, ray: &Ray) -> Intersection;
+    fn test_intersection(&self, ray: &Ray, depth: u8) -> Intersection;
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -21,12 +21,14 @@ impl Intersection {
 #[derive(Clone, Copy)]
 pub enum Intersectable {
     Sphere(sphere::Sphere),
+    PointLight(light::PointLight),
 }
 
 impl Intersect for Intersectable {
-    fn test_intersection(&self, ray: &Ray) -> Intersection {
+    fn test_intersection(&self, ray: &Ray, depth: u8) -> Intersection {
         match self {
-            Intersectable::Sphere(s) => s.test_intersection(ray),
+            Intersectable::Sphere(s) => s.test_intersection(ray, depth),
+            Intersectable::PointLight(l) => l.test_intersection(ray, depth),
         }
     }
 }

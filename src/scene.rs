@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 
 use crate::{
     intersect::{Intersect, Intersectable, Intersection},
+    light::{self, PointLight},
     renderer::Ray,
     sphere::Sphere,
 };
@@ -16,7 +17,7 @@ impl Scene {
         let mut all_objects = self
             .objects
             .iter()
-            .map(|obj| obj.test_intersection(&ray))
+            .map(|obj| obj.test_intersection(&ray, 0))
             .collect::<Vec<Intersection>>();
         all_objects.sort_by(|a, b| {
             if let Some(r_a) = a.distance {
@@ -33,6 +34,7 @@ impl Scene {
         all_objects[0]
     }
 
+    #[allow(dead_code)]
     pub fn new_test() -> Scene {
         let mut objects = vec![];
 
@@ -47,6 +49,25 @@ impl Scene {
             }));
         }
 
+        objects.push(Intersectable::PointLight(light::PointLight::new(
+            nalgebra::Vector3::new(0.0, 0.0, 0.0),
+            1.0,
+        )));
+
+        Scene { objects }
+    }
+
+    pub fn pondering_orbs() -> Scene {
+        let objects = vec![
+            Intersectable::Sphere(Sphere {
+                origin: nalgebra::Vector3::new(3.0, 8.0, 8.0),
+                radius: 1.0,
+            }),
+            Intersectable::PointLight(PointLight::new(
+                nalgebra::Vector3::new(3.0, -8.0, -8.0),
+                1.0,
+            )),
+        ];
         Scene { objects }
     }
 }

@@ -4,6 +4,7 @@ use renderer::Ray;
 use scene::Scene;
 mod camera;
 mod intersect;
+mod light;
 mod renderer;
 mod scene;
 mod sphere;
@@ -54,7 +55,7 @@ impl Default for RenderApp {
         RenderApp {
             buffer,
             camera,
-            scene: Scene::new_test(),
+            scene: Scene::pondering_orbs(),
         }
     }
 }
