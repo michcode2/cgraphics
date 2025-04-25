@@ -1,17 +1,17 @@
 use std::cmp::Ordering;
 
 use crate::{
-    intersect::{Intersect, Intersection},
+    intersect::{Intersect, Intersectable, Intersection},
     renderer::Ray,
     sphere::Sphere,
 };
 
 #[derive(Clone)]
-pub struct Scene<T: Intersect + Clone> {
-    objects: Vec<T>,
+pub struct Scene {
+    objects: Vec<Intersectable>,
 }
 
-impl<T: Intersect + Clone> Scene<T> {
+impl Scene {
     pub fn test_intersections(&self, ray: Ray) -> Intersection {
         let mut all_objects = self
             .objects
@@ -33,18 +33,18 @@ impl<T: Intersect + Clone> Scene<T> {
         all_objects[0]
     }
 
-    pub fn new_test() -> Scene<Sphere> {
+    pub fn new_test() -> Scene {
         let mut objects = vec![];
 
-        let num_balls = 50000;
+        let num_balls = 500;
         let extent = 10.0;
 
         for i in 0..num_balls {
             let y = -extent + (i as f32 * extent * 2.0 / num_balls as f32);
-            objects.push(Sphere {
+            objects.push(Intersectable::Sphere(Sphere {
                 origin: nalgebra::Vector3::new(3.0, y, 2.0 * (y).sin() + 0.1 * y.powi(2)),
                 radius: 0.05,
-            });
+            }));
         }
 
         Scene { objects }

@@ -17,7 +17,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn create_buffer(&self, scene: &Scene<crate::sphere::Sphere>) -> Vec<Vec<Rgba>> {
+    pub fn create_buffer(&self, scene: &Scene) -> Vec<Vec<Rgba>> {
         let mut buffer: Vec<Vec<Rgba>> =
             vec![vec![Rgba::from_gray(0.0); self.height as usize]; self.width as usize];
         for x in 0..self.width {
@@ -37,7 +37,9 @@ impl Camera {
         }
         buffer
     }
-    pub fn create_buffer_parallel(&self, scene: Scene<crate::sphere::Sphere>) -> Vec<Vec<Rgba>> {
+
+    #[allow(dead_code)]
+    pub fn create_buffer_parallel(&self, scene: Scene) -> Vec<Vec<Rgba>> {
         let mut buffer: Vec<Vec<Rgba>> =
             vec![vec![Rgba::from_gray(0.0); self.height as usize]; self.width as usize];
         let scene_pointer = Arc::new(RwLock::new(scene));

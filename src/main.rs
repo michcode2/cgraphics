@@ -27,7 +27,7 @@ fn main() -> eframe::Result {
 struct RenderApp {
     buffer: Vec<Vec<Rgba>>,
     camera: Camera,
-    scene: Scene<sphere::Sphere>,
+    scene: Scene,
 }
 
 impl Default for RenderApp {
@@ -54,11 +54,12 @@ impl Default for RenderApp {
         RenderApp {
             buffer,
             camera,
-            scene: Scene::<sphere::Sphere>::new_test(),
+            scene: Scene::new_test(),
         }
     }
 }
 
+#[allow(deprecated)]
 impl eframe::App for RenderApp {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -133,21 +134,8 @@ impl RenderApp {
         )
     }
 
-    fn update_buffer(&mut self) {
-        let width = self.buffer[0].len();
-        let height = self.buffer.len();
-        for x in 0..width {
-            for y in 0..height {
-                let x_normalised = ((-2.0 * x as f32) / width as f32) + 1.0;
-                let y_normalised = ((2.0 * y as f32) / height as f32) - 1.0;
-                self.buffer[x][y] = renderer::many_spheres(x_normalised, y_normalised);
-                //self.buffer[x][y] = renderer::coordinates(x_normalised, y_normalised);
-            }
-        }
-    }
-
     fn update_buffer_sharedstate(&mut self) {
-        self.buffer = self.camera.create_buffer_parallel(self.scene.clone());
-        //self.buffer = self.camera.create_buffer(&self.scene);
+        //self.buffer = self.camera.create_buffer_parallel(self.scene.clone());
+        self.buffer = self.camera.create_buffer(&self.scene);
     }
 }

@@ -1,6 +1,6 @@
 use eframe::egui::Rgba;
 
-use crate::renderer::Ray;
+use crate::{renderer::Ray, sphere};
 
 pub trait Intersect {
     fn test_intersection(&self, ray: &Ray) -> Intersection;
@@ -15,5 +15,18 @@ pub struct Intersection {
 impl Intersection {
     pub fn new(colour: Rgba, distance: Option<f32>) -> Intersection {
         Intersection { colour, distance }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub enum Intersectable {
+    Sphere(sphere::Sphere),
+}
+
+impl Intersect for Intersectable {
+    fn test_intersection(&self, ray: &Ray) -> Intersection {
+        match self {
+            Intersectable::Sphere(s) => s.test_intersection(ray),
+        }
     }
 }

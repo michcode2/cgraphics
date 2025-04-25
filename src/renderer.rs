@@ -1,5 +1,4 @@
 use std::cmp::Ordering;
-use std::sync::Arc;
 
 use eframe::egui::Rgba;
 use nalgebra::{self, Vector3};
@@ -35,6 +34,7 @@ pub fn coordinates(x: f32, y: f32) -> Rgba {
     return Rgba::from_rgb(x, y, 0.0);
 }
 
+#[allow(dead_code)]
 pub fn many_spheres(x: f32, y: f32) -> Rgba {
     let first_sphere = Sphere {
         origin: nalgebra::Vector3::new(3.0, 1.5, 3.0),
