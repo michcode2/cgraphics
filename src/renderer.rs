@@ -89,7 +89,7 @@ pub fn many_spheres(x: f32, y: f32) -> Rgba {
 
     let mut unsorted = objects
         .into_iter()
-        .map(|obj| obj.test_intersection(&pixel_ray))
+        .map(|obj| obj.test_intersection(&pixel_ray, 3))
         .collect::<Vec<Intersection>>();
     unsorted.sort_by(|a, b| {
         if let Some(r_a) = a.distance {

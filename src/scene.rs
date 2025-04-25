@@ -17,7 +17,7 @@ impl Scene {
         let mut all_objects = self
             .objects
             .iter()
-            .map(|obj| obj.test_intersection(&ray, 0))
+            .map(|obj| obj.test_intersection(&ray, 2))
             .collect::<Vec<Intersection>>();
         all_objects.sort_by(|a, b| {
             if let Some(r_a) = a.distance {
