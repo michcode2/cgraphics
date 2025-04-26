@@ -33,7 +33,7 @@ struct RenderApp {
 impl Default for RenderApp {
     fn default() -> Self {
         let width = 500;
-        let height = 900;
+        let height = 800;
 
         let row = (0..width)
             .map(|_| Rgba::from_gray(0.0))

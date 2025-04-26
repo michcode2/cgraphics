@@ -40,7 +40,15 @@ impl Eq for Intersection {}
 impl PartialOrd for Intersection {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         match (self.distance, other.distance) {
-            (Some(self_dist), Some(other_dist)) => return other_dist.partial_cmp(&self_dist),
+            (Some(self_dist), Some(other_dist)) => {
+                if self_dist == other_dist {
+                    return Some(Ordering::Equal);
+                } else if self_dist < other_dist {
+                    return Some(Ordering::Less);
+                } else {
+                    return Some(Ordering::Greater);
+                }
+            }
             (Some(_), _) => return Some(Ordering::Less),
             (_, Some(_)) => return Some(Ordering::Greater),
             (_, _) => return Some(Ordering::Equal),

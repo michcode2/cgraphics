@@ -1,5 +1,3 @@
-use std::cmp::Ordering;
-
 use eframe::egui::Rgba;
 
 use crate::{
@@ -23,12 +21,12 @@ impl Scene {
             .objects
             .iter()
             .map(|obj| obj.test_intersection(&ray))
-            .map(|intersect| {
+            .map(|mut intersect| {
                 if let Some(ray_new) = intersect.normal {
                     if current_depth < self.max_depth {
-                        let mut result = self.test_intersections(ray_new, 0);
-                        result.colour = intersect.colour + result.colour.multiply(0.9);
-                        return result;
+                        let result = self.test_intersections(ray_new, 0);
+                        intersect.colour = intersect.colour + result.colour.multiply(2.0);
+                        return intersect;
                     } else {
                         return intersect;
                     }
@@ -38,7 +36,13 @@ impl Scene {
             })
             .collect::<Vec<Intersection>>();
         all_objects.sort();
-        all_objects[0]
+
+        if let Some(_) = all_objects[0].normal {
+            return all_objects[0];
+        } else {
+            all_objects[0].colour = all_objects[0].colour + Rgba::from_gray(-0.01);
+            return all_objects[0];
+        }
     }
 
     #[allow(dead_code)]
@@ -87,12 +91,12 @@ impl Scene {
                 colour: Rgba::from_white_alpha(1.0),
             }),
             Intersectable::Sphere(Sphere {
-                origin: nalgebra::Vector3::new(1.0, 3.9, 3.9),
-                radius: 0.6,
+                origin: nalgebra::Vector3::new(0.0, 3.6, 3.9),
+                radius: 0.5,
                 colour: Rgba::from_rgb(1.0, 0.0, 0.0),
             }),
             Intersectable::PointLight(PointLight::new(
-                nalgebra::Vector3::new(3.0, -8.0, -8.0),
+                nalgebra::Vector3::new(12.0, -8.0, -8.0),
                 1.0,
             )),
         ];

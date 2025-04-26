@@ -40,6 +40,6 @@ impl Intersect for Sphere {
             return Intersection::new(self.colour, Some(distance), Some(normal_ray));
         }
         //return Intersection::new(Rgba::from_gray(background), None, None);
-        return Intersection::new(Rgba::from_rgb(0.0, 1.0, 0.0), None, None);
+        return Intersection::new(Rgba::from_rgb(0.0, 0.0, 0.0), None, None);
     }
 }

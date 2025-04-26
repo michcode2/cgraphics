@@ -112,7 +112,12 @@ pub fn many_spheres(x: f32, y: f32) -> Rgba {
         }
         return Ordering::Greater;
     });
-    unsorted[0].colour
+    if let Some(_) = unsorted[0].normal {
+        println!("{:?}", unsorted[0].normal);
+        return unsorted[0].colour;
+    } else {
+        return unsorted[0].colour + Rgba::from_gray(0.8);
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
