@@ -89,7 +89,7 @@ pub fn many_spheres(x: f32, y: f32) -> Rgba {
 
     let mut unsorted = objects
         .into_iter()
-        .map(|obj| obj.test_intersection(&pixel_ray, 3))
+        .map(|obj| obj.test_intersection(&pixel_ray))
         .collect::<Vec<Intersection>>();
     unsorted.sort_by(|a, b| {
         if let Some(r_a) = a.distance {
@@ -106,7 +106,7 @@ pub fn many_spheres(x: f32, y: f32) -> Rgba {
     unsorted[0].colour
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Ray {
     pub origin: Vector3<f32>,
     pub direction: Vector3<f32>,

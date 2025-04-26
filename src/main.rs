@@ -10,7 +10,6 @@ mod scene;
 mod sphere;
 
 fn main() -> eframe::Result {
-    println!("Hello, world!");
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_inner_size([820.0, 820.0]),
         ..Default::default()
@@ -33,8 +32,8 @@ struct RenderApp {
 
 impl Default for RenderApp {
     fn default() -> Self {
-        let width = 800;
-        let height = 800;
+        let width = 1000;
+        let height = 1000;
 
         let row = (0..height)
             .map(|_| Rgba::from_gray(0.0))
@@ -55,7 +54,7 @@ impl Default for RenderApp {
         RenderApp {
             buffer,
             camera,
-            scene: Scene::pondering_orbs(),
+            scene: Scene::curve(),
         }
     }
 }

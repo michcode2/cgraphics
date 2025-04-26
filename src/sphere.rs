@@ -14,14 +14,14 @@ pub struct Sphere {
 
 #[allow(non_snake_case)]
 impl Intersect for Sphere {
-    fn test_intersection(&self, ray: &Ray, depth: u8) -> Intersection {
+    fn test_intersection(&self, ray: &Ray) -> Intersection {
         let L = self.origin - ray.origin;
         let t_ca = L.dot(&ray.direction);
 
         let background = 0.0;
 
-        if t_ca < 0.0 {
-            return Intersection::new(Rgba::from_gray(background), None);
+        if t_ca <= 0.0 {
+            return Intersection::new(Rgba::from_gray(background), None, None);
         }
 
         let close_approach_point = ray.at_point(t_ca); // closest approach
@@ -30,12 +30,18 @@ impl Intersect for Sphere {
         let t_surface = t_ca - t_surface_to_cap;
         let surface = ray.at_point(t_surface);
 
-        let normal = self.origin - surface;
-        let normal = normal / normal.norm();
+        let normal_vec = surface - self.origin;
+        let normal_vec = normal_vec / normal_vec.norm();
 
-        if distance < self.radius && depth < 3 {
-            return Intersection::new(Rgba::from_rgb(normal.x, normal.y, normal.z), Some(distance));
+        let normal_ray = Ray::new(surface, normal_vec);
+
+        if distance < self.radius {
+            return Intersection::new(
+                Rgba::from_rgb(1.0, 0.0, 1.0),
+                Some(distance),
+                Some(normal_ray),
+            );
         }
-        return Intersection::new(Rgba::from_gray(background), None);
+        return Intersection::new(Rgba::from_gray(background), None, None);
     }
 }

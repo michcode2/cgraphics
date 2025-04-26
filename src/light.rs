@@ -17,15 +17,16 @@ impl PointLight {
     }
 }
 
+#[allow(non_snake_case)]
 impl Intersect for PointLight {
-    fn test_intersection(&self, ray: &renderer::Ray, _: u8) -> crate::intersect::Intersection {
+    fn test_intersection(&self, ray: &renderer::Ray) -> crate::intersect::Intersection {
         let L = self.origin - ray.origin;
         let t_ca = L.dot(&ray.direction);
 
         let background = 0.0;
 
         if t_ca < 0.0 {
-            return Intersection::new(Rgba::from_gray(background), None);
+            return Intersection::new(Rgba::from_gray(background), None, None);
         }
 
         let close_approach_point = ray.at_point(t_ca); // closest approach
@@ -33,6 +34,6 @@ impl Intersect for PointLight {
 
         let brightness = self.intensity / distance.powi(2);
 
-        return Intersection::new(Rgba::from_gray(brightness), Some(10.0));
+        return Intersection::new(Rgba::from_gray(brightness), Some(10.0), None);
     }
 }

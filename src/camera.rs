@@ -5,10 +5,7 @@ use std::{
 
 use eframe::egui::Rgba;
 
-use crate::{
-    renderer::Ray,
-    scene::Scene,
-};
+use crate::{renderer::Ray, scene::Scene};
 
 pub struct Camera {
     pub location: Ray,
@@ -31,7 +28,7 @@ impl Camera {
                     self.location.origin,
                     pixel_direction + self.location.direction,
                 );
-                let color = scene.test_intersections(pixel_ray).colour;
+                let color = scene.test_intersections(pixel_ray, 0).colour;
                 buffer[x as usize][y as usize] = color;
             }
         }
@@ -62,7 +59,7 @@ impl Camera {
                     return thread_scene_pointer
                         .read()
                         .unwrap()
-                        .test_intersections(pixel_ray);
+                        .test_intersections(pixel_ray, 0);
                 };
                 jobs.push((x as usize, y as usize, job));
             }
