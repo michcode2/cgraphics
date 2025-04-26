@@ -1,5 +1,7 @@
 use std::cmp::Ordering;
 
+use eframe::egui::Rgba;
+
 use crate::{
     intersect::{Intersect, Intersectable, Intersection},
     light::{self, PointLight},
@@ -24,7 +26,9 @@ impl Scene {
             .map(|intersect| {
                 if let Some(ray_new) = intersect.normal {
                     if current_depth < self.max_depth {
-                        return self.test_intersections(ray_new, current_depth + 1);
+                        let mut result = self.test_intersections(ray_new, 0);
+                        result.colour = intersect.colour + result.colour.multiply(0.9);
+                        return result;
                     } else {
                         return intersect;
                     }
@@ -33,18 +37,7 @@ impl Scene {
                 }
             })
             .collect::<Vec<Intersection>>();
-        all_objects.sort_by(|a, b| {
-            if let Some(r_a) = a.distance {
-                if let Some(r_b) = b.distance {
-                    if r_a < r_b {
-                        return Ordering::Less;
-                    }
-                    return Ordering::Greater;
-                }
-                return Ordering::Less;
-            }
-            return Ordering::Greater;
-        });
+        all_objects.sort();
         all_objects[0]
     }
 
@@ -60,6 +53,7 @@ impl Scene {
             objects.push(Intersectable::Sphere(Sphere {
                 origin: nalgebra::Vector3::new(3.0, y, 2.0 * (y).sin() + 0.1 * y.powi(2)),
                 radius: 0.1,
+                colour: Rgba::from_white_alpha(1.0),
             }));
         }
 
@@ -85,10 +79,17 @@ impl Scene {
             Intersectable::Sphere(Sphere {
                 origin: nalgebra::Vector3::new(3.0, 8.0, 8.0),
                 radius: 1.0,
+                colour: Rgba::from_white_alpha(1.0),
             }),
             Intersectable::Sphere(Sphere {
                 origin: nalgebra::Vector3::new(3.0, 5.0, 5.0),
                 radius: 1.0,
+                colour: Rgba::from_white_alpha(1.0),
+            }),
+            Intersectable::Sphere(Sphere {
+                origin: nalgebra::Vector3::new(1.0, 3.9, 3.9),
+                radius: 0.6,
+                colour: Rgba::from_rgb(1.0, 0.0, 0.0),
             }),
             Intersectable::PointLight(PointLight::new(
                 nalgebra::Vector3::new(3.0, -8.0, -8.0),
@@ -107,6 +108,7 @@ impl Scene {
             Intersectable::Sphere(Sphere {
                 origin: nalgebra::Vector3::new(3.0, 0.0, 0.0),
                 radius: 1.0,
+                colour: Rgba::from_white_alpha(1.0),
             }),
             Intersectable::PointLight(PointLight::new(nalgebra::Vector3::new(9.0, 0.0, 0.0), 1.0)),
         ];

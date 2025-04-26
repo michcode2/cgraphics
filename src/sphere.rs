@@ -10,6 +10,7 @@ use crate::{
 pub struct Sphere {
     pub origin: nalgebra::Vector3<f32>,
     pub radius: f32,
+    pub colour: Rgba,
 }
 
 #[allow(non_snake_case)]
@@ -36,12 +37,9 @@ impl Intersect for Sphere {
         let normal_ray = Ray::new(surface, normal_vec);
 
         if distance < self.radius {
-            return Intersection::new(
-                Rgba::from_rgb(1.0, 0.0, 1.0),
-                Some(distance),
-                Some(normal_ray),
-            );
+            return Intersection::new(self.colour, Some(distance), Some(normal_ray));
         }
-        return Intersection::new(Rgba::from_gray(background), None, None);
+        //return Intersection::new(Rgba::from_gray(background), None, None);
+        return Intersection::new(Rgba::from_rgb(0.0, 1.0, 0.0), None, None);
     }
 }

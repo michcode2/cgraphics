@@ -32,14 +32,14 @@ struct RenderApp {
 
 impl Default for RenderApp {
     fn default() -> Self {
-        let width = 1000;
-        let height = 1000;
+        let width = 500;
+        let height = 900;
 
-        let row = (0..height)
+        let row = (0..width)
             .map(|_| Rgba::from_gray(0.0))
             .collect::<Vec<Rgba>>();
 
-        let buffer = (0..width).map(|_| row.clone()).collect::<Vec<Vec<Rgba>>>();
+        let buffer = (0..height).map(|_| row.clone()).collect::<Vec<Vec<Rgba>>>();
 
         let ray_location = nalgebra::Vector3::new(-10.0, 0.0, 0.0);
         let ray_direction = nalgebra::Vector3::new(1.0, 0.0, 0.0);
@@ -54,7 +54,7 @@ impl Default for RenderApp {
         RenderApp {
             buffer,
             camera,
-            scene: Scene::curve(),
+            scene: Scene::pondering_orbs(),
         }
     }
 }

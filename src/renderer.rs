@@ -39,11 +39,13 @@ pub fn many_spheres(x: f32, y: f32) -> Rgba {
     let first_sphere = Sphere {
         origin: nalgebra::Vector3::new(3.0, 1.5, 3.0),
         radius: 0.75,
+        colour: Rgba::from_white_alpha(1.0),
     };
 
     let second_sphere = Sphere {
         origin: nalgebra::Vector3::new(3.0, -1.5, 3.0),
         radius: 0.75,
+        colour: Rgba::from_white_alpha(1.0),
     };
 
     let mut objects = vec![first_sphere, second_sphere];
@@ -51,36 +53,43 @@ pub fn many_spheres(x: f32, y: f32) -> Rgba {
     objects.push(Sphere {
         origin: nalgebra::Vector3::new(3.0, -3.0, 0.0),
         radius: 0.5,
+        colour: Rgba::from_white_alpha(1.0),
     });
 
     objects.push(Sphere {
         origin: nalgebra::Vector3::new(3.0, 3.0, 0.0),
         radius: 0.5,
+        colour: Rgba::from_white_alpha(1.0),
     });
 
     objects.push(Sphere {
         origin: nalgebra::Vector3::new(3.0, 2.0, -1.0),
         radius: 0.5,
+        colour: Rgba::from_white_alpha(1.0),
     });
 
     objects.push(Sphere {
         origin: nalgebra::Vector3::new(3.0, -2.0, -1.0),
         radius: 0.5,
+        colour: Rgba::from_white_alpha(1.0),
     });
 
     objects.push(Sphere {
         origin: nalgebra::Vector3::new(3.0, -1.0, -1.0),
         radius: 0.5,
+        colour: Rgba::from_white_alpha(1.0),
     });
 
     objects.push(Sphere {
         origin: nalgebra::Vector3::new(3.0, 1.0, -1.0),
         radius: 0.5,
+        colour: Rgba::from_white_alpha(1.0),
     });
 
     objects.push(Sphere {
         origin: nalgebra::Vector3::new(3.0, 0.0, -1.0),
         radius: 0.5,
+        colour: Rgba::from_white_alpha(1.0),
     });
 
     let direction = nalgebra::Vector3::new(0.5, y, x + 0.1);

@@ -43,8 +43,9 @@ impl Camera {
         let mut jobs = vec![];
         for x in 0..self.width {
             for y in 0..self.height {
-                let x_normalised = ((-2.0 * x as f32) / self.width as f32) + 1.0;
-                let y_normalised = ((2.0 * y as f32) / self.height as f32) - 1.0;
+                let dim_small = self.width.min(self.height) as f32;
+                let x_normalised = ((-2.0 * x as f32) / dim_small) + 1.0;
+                let y_normalised = ((2.0 * y as f32) / dim_small) - 1.0;
 
                 let pixel_direction = nalgebra::Vector3::new(0.0, y_normalised, x_normalised);
 
