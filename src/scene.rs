@@ -25,7 +25,7 @@ impl Scene {
                 if let Some(ray_new) = intersect.normal {
                     if current_depth < self.max_depth {
                         let result = self.test_intersections(ray_new, 0);
-                        intersect.colour = intersect.colour + result.colour.multiply(2.0);
+                        intersect.colour = result.colour + intersect.colour.multiply(0.99);
                         return intersect;
                     } else {
                         return intersect;

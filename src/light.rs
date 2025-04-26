@@ -32,7 +32,7 @@ impl Intersect for PointLight {
         let close_approach_point = ray.at_point(t_ca); // closest approach
         let distance = (close_approach_point - self.origin).norm();
 
-        let brightness = self.intensity / distance.powi(2);
+        let brightness = t_ca * self.intensity / distance.powi(2);
 
         return Intersection::new(Rgba::from_gray(brightness), Some(10.0), None);
     }
