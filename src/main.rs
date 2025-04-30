@@ -77,38 +77,8 @@ impl eframe::App for RenderApp {
                         Key::D => self.camera.location.origin.y += 0.1,
                         Key::Z => self.camera.location.origin.z += 0.1,
                         Key::X => self.camera.location.origin.z -= 0.1,
-                        Key::ArrowLeft => {
-                            let x = self.camera.location.direction.x;
-                            let y = self.camera.location.direction.y;
-
-                            let theta = y.atan2(x);
-                            let r = (x.powi(2) + y.powi(2)).sqrt();
-
-                            let theta_1 = theta - 0.01;
-
-                            let x_1 = theta_1.cos() * r;
-                            let y_1 = theta_1.sin() * r;
-
-                            self.camera.location.direction.x = x_1;
-                            self.camera.location.direction.y = y_1;
-                            println!("{:?}", self.camera.location.direction);
-                        }
-                        Key::ArrowRight => {
-                            let x = self.camera.location.direction.x;
-                            let y = self.camera.location.direction.y;
-
-                            let theta = y.atan2(x);
-                            let r = (x.powi(2) + y.powi(2)).sqrt();
-
-                            let theta_1 = theta + 0.01;
-
-                            let x_1 = theta_1.cos() * r;
-                            let y_1 = theta_1.sin() * r;
-
-                            self.camera.location.direction.x = x_1;
-                            self.camera.location.direction.y = y_1;
-                            println!("{:?}", self.camera.location.direction);
-                        }
+                        Key::ArrowLeft => self.camera.rotate_horizontal(0.01),
+                        Key::ArrowRight => self.camera.rotate_horizontal(-0.01),
                         _ => (),
                     }
                 }

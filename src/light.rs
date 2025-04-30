@@ -34,6 +34,6 @@ impl Intersect for PointLight {
 
         let brightness = t_ca * self.intensity / distance.powi(2);
 
-        return Intersection::new(Rgba::from_gray(brightness), Some(10.0), None);
+        return Intersection::new(Rgba::from_gray(brightness), Some(100000.0), None);
     }
 }

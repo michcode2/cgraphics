@@ -1,8 +1,3 @@
-use std::{
-    sync::{Arc, RwLock},
-    thread,
-};
-
 use eframe::egui::Rgba;
 
 use crate::{renderer::Ray, scene::Scene};
@@ -22,7 +17,11 @@ impl Camera {
                 let x_normalised = ((-2.0 * x as f32) / self.width as f32) + 1.0;
                 let y_normalised = ((2.0 * y as f32) / self.height as f32) - 1.0;
 
-                let pixel_direction = nalgebra::Vector3::new(0.0, y_normalised, x_normalised);
+                let pixel_direction = nalgebra::Vector3::new(
+                    -y_normalised * self.get_direction_horizontal().sin(),
+                    y_normalised * self.get_direction_horizontal().cos(),
+                    x_normalised,
+                );
 
                 let pixel_ray = Ray::new(
                     self.location.origin,
@@ -35,7 +34,26 @@ impl Camera {
         buffer
     }
 
-    #[allow(dead_code)]
+    pub fn rotate_horizontal(&mut self, dtheta: f32) {
+        let r = (self.location.direction.x.powi(2) + self.location.direction.y.powi(2)).sqrt();
+
+        let theta_1 = self.get_direction_horizontal() - dtheta;
+
+        let x_1 = theta_1.cos() * r;
+        let y_1 = theta_1.sin() * r;
+
+        self.location.direction.x = x_1;
+        self.location.direction.y = y_1;
+    }
+
+    fn get_direction_horizontal(&self) -> f32 {
+        let x = self.location.direction.x;
+        let y = self.location.direction.y;
+
+        y.atan2(x)
+    }
+
+    /*
     pub fn create_buffer_parallel(&self, scene: Scene) -> Vec<Vec<Rgba>> {
         let mut buffer: Vec<Vec<Rgba>> =
             vec![vec![Rgba::from_gray(0.0); self.height as usize]; self.width as usize];
