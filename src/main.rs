@@ -32,16 +32,20 @@ struct RenderApp {
 }
 
 impl Default for RenderApp {
+    // runs once at the start
     fn default() -> Self {
+        // these are the wrong way round teehee
         let width = 900;
         let height = 800;
 
+        // make the buffer
         let row = (0..width)
             .map(|_| Rgba::from_gray(0.0))
             .collect::<Vec<Rgba>>();
 
         let buffer = (0..height).map(|_| row.clone()).collect::<Vec<Vec<Rgba>>>();
 
+        // set up camera
         let ray_location = nalgebra::Vector3::new(-10.0, 0.0, 0.0);
         let ray_direction = nalgebra::Vector3::new(1.0, 0.0, 0.0);
         let origin_ray = Ray::new_preserve(ray_location, ray_direction);
@@ -65,10 +69,12 @@ impl eframe::App for RenderApp {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             self.update_buffer_sharedstate();
+            // tell self to tell the camera to render
             let img =
                 egui_extras::image::RetainedImage::from_color_image("text", self.buffer_to_image());
             img.show(ui);
 
+            // handle user inputs
             ctx.input(|inputs| {
                 for pressed in &inputs.keys_down {
                     match pressed {
@@ -89,6 +95,7 @@ impl eframe::App for RenderApp {
 }
 
 impl RenderApp {
+    // takes in the vector and makes a colorImage from it
     fn buffer_to_image(&self) -> egui::ColorImage {
         let mut flattened = vec![];
         for row in &self.buffer {
@@ -105,6 +112,7 @@ impl RenderApp {
         )
     }
 
+    // tells the camera to do the rendering, parallel is slower than sequential for now
     fn update_buffer_sharedstate(&mut self) {
         //self.buffer = self.camera.create_buffer_parallel(self.scene.clone());
         self.buffer = self.camera.create_buffer(&self.scene);

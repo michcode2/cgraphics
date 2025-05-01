@@ -13,18 +13,24 @@ pub struct Scene {
     max_depth: u8,
 }
 
-const DEPTH: u8 = 8;
+// max number of bounces
+const DEPTH: u8 = 6;
 
 impl Scene {
     pub fn test_intersections(&self, ray: Ray, current_depth: u8) -> Intersection {
+        // go over each object in the scene
         let mut all_objects = self
             .objects
             .iter()
+            // go over each object in the scene and find the intersections
             .map(|obj| obj.test_intersection(&ray))
             .map(|mut intersect| {
+                // if the normal is a value, it implies that something has been hit
                 if let Some(ray_new) = intersect.normal {
+                    // do another bounce if theres still bounces avaliable
                     if current_depth < self.max_depth {
                         let result = self.test_intersections(ray_new, 0);
+                        // adjust the colour a little bit
                         intersect.colour = result.colour + intersect.colour.multiply(0.99);
                         return intersect;
                     } else {
@@ -35,6 +41,7 @@ impl Scene {
                 }
             })
             .collect::<Vec<Intersection>>();
+        // order all the objects by how far they are and return the closest one
         all_objects.sort();
 
         if let Some(_) = all_objects[0].normal {

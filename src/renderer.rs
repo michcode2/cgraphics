@@ -7,34 +7,7 @@ use crate::intersect::{Intersect, Intersection};
 use crate::sphere::Sphere;
 
 #[allow(dead_code)]
-#[allow(non_snake_case)]
-pub fn single_sphere(x: f32, y: f32) -> Rgba {
-    // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-Sphere-intersection.html
-    let C = nalgebra::Vector3::new(2.0, 0.0, 0.0); // center of Sphere
-    let r = 0.5;
-    let O = nalgebra::Vector3::new(0.0, 0.0, 0.0); // ray origin
-    let D = nalgebra::Vector3::new(1.0, y, x);
-    let L = C - O;
-    let t_ca = L.dot(&D);
-
-    if t_ca < 0.0 {
-        return Rgba::from_gray(1.0);
-    }
-
-    let CLApp = O + D * t_ca; // closest approach
-    let distance = (CLApp - C).norm();
-    if distance < r {
-        return Rgba::from_rgb(CLApp.x, CLApp.y, CLApp.z);
-    }
-    return Rgba::from_gray(1.0);
-}
-
-#[allow(dead_code)]
-pub fn coordinates(x: f32, y: f32) -> Rgba {
-    return Rgba::from_rgb(x, y, 0.0);
-}
-
-#[allow(dead_code)]
+// the little smiley face
 pub fn many_spheres(x: f32, y: f32) -> Rgba {
     let first_sphere = Sphere {
         origin: nalgebra::Vector3::new(3.0, 1.5, 3.0),
@@ -120,6 +93,7 @@ pub fn many_spheres(x: f32, y: f32) -> Rgba {
     }
 }
 
+// this should probably go in its own file
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {
     pub origin: Vector3<f32>,
