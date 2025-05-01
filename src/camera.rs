@@ -1,4 +1,5 @@
 use eframe::egui::Rgba;
+use nalgebra::Vector3;
 
 use crate::{renderer::Ray, scene::Scene};
 
@@ -53,6 +54,14 @@ impl Camera {
         y.atan2(x)
     }
 
+    pub fn move_by(&mut self, direction: Vector3<f32>) {
+        self.location.origin.x += direction.x * self.get_direction_horizontal().cos()
+            - direction.y * self.get_direction_horizontal().sin();
+        self.location.origin.y += direction.x * self.get_direction_horizontal().sin()
+            + direction.y * self.get_direction_horizontal().cos();
+        self.location.origin.z += direction.z;
+    }
+
     /*
     pub fn create_buffer_parallel(&self, scene: Scene) -> Vec<Vec<Rgba>> {
         let mut buffer: Vec<Vec<Rgba>> =
@@ -100,5 +109,5 @@ impl Camera {
             }
         }
         buffer
-    }
+    }*/
 }

@@ -1,5 +1,6 @@
 use camera::Camera;
 use eframe::egui::{self, Key, Rgba};
+use nalgebra::Vector3;
 use renderer::Ray;
 use scene::Scene;
 mod camera;
@@ -32,7 +33,7 @@ struct RenderApp {
 
 impl Default for RenderApp {
     fn default() -> Self {
-        let width = 500;
+        let width = 900;
         let height = 800;
 
         let row = (0..width)
@@ -71,12 +72,12 @@ impl eframe::App for RenderApp {
             ctx.input(|inputs| {
                 for pressed in &inputs.keys_down {
                     match pressed {
-                        Key::W => self.camera.location.origin.x += 0.1,
-                        Key::S => self.camera.location.origin.x -= 0.1,
-                        Key::A => self.camera.location.origin.y -= 0.1,
-                        Key::D => self.camera.location.origin.y += 0.1,
-                        Key::Z => self.camera.location.origin.z += 0.1,
-                        Key::X => self.camera.location.origin.z -= 0.1,
+                        Key::W => self.camera.move_by(Vector3::new(0.1, 0.0, 0.0)),
+                        Key::S => self.camera.move_by(Vector3::new(-0.1, 0.0, 0.0)),
+                        Key::A => self.camera.move_by(Vector3::new(0.0, -0.1, 0.0)),
+                        Key::D => self.camera.move_by(Vector3::new(0.0, 0.1, 0.0)),
+                        Key::Z => self.camera.move_by(Vector3::new(0.0, 0.0, 0.1)),
+                        Key::X => self.camera.move_by(Vector3::new(0.0, 0.0, -0.1)),
                         Key::ArrowLeft => self.camera.rotate_horizontal(0.01),
                         Key::ArrowRight => self.camera.rotate_horizontal(-0.01),
                         _ => (),
