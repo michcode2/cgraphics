@@ -6,6 +6,7 @@ use scene::Scene;
 mod camera;
 mod intersect;
 mod light;
+mod plane;
 mod renderer;
 mod scene;
 mod sphere;

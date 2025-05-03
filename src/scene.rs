@@ -1,8 +1,10 @@
 use eframe::egui::Rgba;
+use nalgebra::Vector3;
 
 use crate::{
     intersect::{Intersect, Intersectable, Intersection},
     light::{self, PointLight},
+    plane,
     renderer::Ray,
     sphere::Sphere,
 };
@@ -14,11 +16,12 @@ pub struct Scene {
 }
 
 // max number of bounces
-const DEPTH: u8 = 6;
+const DEPTH: u8 = 3;
 
 impl Scene {
     pub fn test_intersections(&self, ray: Ray, current_depth: u8) -> Intersection {
         // go over each object in the scene
+        //println!("{}", current_depth);
         let mut all_objects = self
             .objects
             .iter()
@@ -29,9 +32,9 @@ impl Scene {
                 if let Some(ray_new) = intersect.normal {
                     // do another bounce if theres still bounces avaliable
                     if current_depth < self.max_depth {
-                        let result = self.test_intersections(ray_new, 0);
+                        let result = self.test_intersections(ray_new, current_depth + 1);
                         // adjust the colour a little bit
-                        intersect.colour = result.colour + intersect.colour.multiply(0.99);
+                        intersect.colour = result.colour + intersect.colour.multiply(0.01);
                         return intersect;
                     } else {
                         return intersect;
@@ -86,6 +89,12 @@ impl Scene {
 
     #[allow(dead_code)]
     pub fn pondering_orbs() -> Scene {
+        let a = Vector3::new(0.0, 0.0, 0.0);
+        let b = Vector3::new(1.0, 0.0, 0.0);
+        let c = Vector3::new(0.0, 1.0, 0.0);
+
+        let plane = plane::Plane::from_3_points(a, b, c);
+
         let objects = vec![
             Intersectable::Sphere(Sphere {
                 origin: nalgebra::Vector3::new(3.0, 8.0, 8.0),
@@ -106,6 +115,7 @@ impl Scene {
                 nalgebra::Vector3::new(12.0, -8.0, -8.0),
                 1.0,
             )),
+            Intersectable::Plane(plane),
         ];
         Scene {
             objects,

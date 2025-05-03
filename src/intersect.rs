@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 
 use eframe::egui::Rgba;
 
-use crate::{light, renderer::Ray, sphere};
+use crate::{light, plane, renderer::Ray, sphere};
 
 pub trait Intersect {
     fn test_intersection(&self, ray: &Ray) -> Intersection;
@@ -66,6 +66,7 @@ impl Ord for Intersection {
 pub enum Intersectable {
     Sphere(sphere::Sphere),
     PointLight(light::PointLight),
+    Plane(plane::Plane),
 }
 
 impl Intersect for Intersectable {
@@ -73,6 +74,7 @@ impl Intersect for Intersectable {
         match self {
             Intersectable::Sphere(s) => s.test_intersection(ray),
             Intersectable::PointLight(l) => l.test_intersection(ray),
+            Intersectable::Plane(p) => p.test_intersection(ray),
         }
     }
 }

@@ -33,6 +33,7 @@ impl Camera {
                     pixel_direction + self.location.direction,
                 );
 
+                //println!("{}, {}", x, y);
                 // do the calculations and put it in the buffer
                 let color = scene.test_intersections(pixel_ray, 0).colour;
                 buffer[x as usize][y as usize] = color;
