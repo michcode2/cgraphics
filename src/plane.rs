@@ -34,11 +34,13 @@ impl Intersect for Plane {
     fn test_intersection(&self, ray: &crate::renderer::Ray) -> intersect::Intersection {
         // the point that the ray intersects the plane will be the close approach point
         let L = self.origin - ray.origin;
-        let t_ca = L.dot(&ray.direction);
+
+        let theta = ray.direction.dot(&self.normal).acos().sin();
+        let t_ca = L.dot(&ray.direction) * theta;
         if t_ca < 0.0 {
             return Intersection::new(Rgba::from_gray(0.0), None, None);
         }
-        let intersection = ray.at_point(t_ca);
+        let intersection = ray.at_point(t_ca * theta);
         let normal_ray = Ray::new(intersection, self.normal);
         return Intersection::new(Rgba::from_gray(0.5), Some(t_ca), Some(normal_ray));
     }

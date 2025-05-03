@@ -16,7 +16,7 @@ pub struct Scene {
 }
 
 // max number of bounces
-const DEPTH: u8 = 3;
+const DEPTH: u8 = 5;
 
 impl Scene {
     pub fn test_intersections(&self, ray: Ray, current_depth: u8) -> Intersection {
@@ -34,7 +34,7 @@ impl Scene {
                     if current_depth < self.max_depth {
                         let result = self.test_intersections(ray_new, current_depth + 1);
                         // adjust the colour a little bit
-                        intersect.colour = result.colour + intersect.colour.multiply(0.01);
+                        intersect.colour = result.colour + intersect.colour.multiply(0.2);
                         return intersect;
                     } else {
                         return intersect;
@@ -91,7 +91,7 @@ impl Scene {
     pub fn pondering_orbs() -> Scene {
         let a = Vector3::new(0.0, 0.0, 0.0);
         let b = Vector3::new(1.0, 0.0, 0.0);
-        let c = Vector3::new(0.0, 1.0, 0.0);
+        let c = Vector3::new(0.0, 1.0, -0.1);
 
         let plane = plane::Plane::from_3_points(a, b, c);
 
@@ -112,7 +112,7 @@ impl Scene {
                 colour: Rgba::from_rgb(1.0, 0.0, 0.0),
             }),
             Intersectable::PointLight(PointLight::new(
-                nalgebra::Vector3::new(12.0, -8.0, -8.0),
+                nalgebra::Vector3::new(12.0, 0.0, 10.0),
                 1.0,
             )),
             Intersectable::Plane(plane),
