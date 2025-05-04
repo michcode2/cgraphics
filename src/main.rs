@@ -37,8 +37,8 @@ impl Default for RenderApp {
     // runs once at the start
     fn default() -> Self {
         // these are the wrong way round teehee
-        let width = 300;
-        let height = 300;
+        let width = 500;
+        let height = 500;
 
         // make the buffer
         let row = (0..width)
@@ -69,7 +69,6 @@ impl Default for RenderApp {
 #[allow(deprecated)]
 impl eframe::App for RenderApp {
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
-        println!("\n\n\n\n\n");
         egui::CentralPanel::default().show(ctx, |ui| {
             self.update_buffer_sharedstate();
             // tell self to tell the camera to render
@@ -87,8 +86,8 @@ impl eframe::App for RenderApp {
                         Key::D => self.camera.move_by(Vector3::new(0.0, 0.1, 0.0)),
                         Key::Z => self.camera.move_by(Vector3::new(0.0, 0.0, 0.1)),
                         Key::X => self.camera.move_by(Vector3::new(0.0, 0.0, -0.1)),
-                        Key::ArrowLeft => self.camera.rotate_horizontal(0.01),
-                        Key::ArrowRight => self.camera.rotate_horizontal(-0.01),
+                        Key::ArrowLeft => self.camera.rotate_horizontal(0.1),
+                        Key::ArrowRight => self.camera.rotate_horizontal(-0.1),
                         _ => (),
                     }
                 }
