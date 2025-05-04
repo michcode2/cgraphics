@@ -42,5 +42,6 @@ impl Intersect for Plane {
             return Intersection::new(Rgba::from_gray(0.0), None, None);
         }
         let normal_ray = Ray::new(ray.at_point(t_int), self.normal);
+        return Intersection::new(Rgba::from_gray(0.5), Some(t_int), Some(normal_ray));
     }
 }
