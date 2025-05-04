@@ -41,7 +41,11 @@ impl Intersect for Sphere {
 
         // return the colour of the sphere if the ray intersects, else the background colour
         if distance < self.radius {
-            return Intersection::new(self.colour, Some(distance), Some(normal_ray));
+            return Intersection::new(
+                self.colour,
+                Some((surface - ray.origin).norm()),
+                Some(normal_ray),
+            );
         }
         return Intersection::new(Rgba::from_gray(background), None, None);
     }

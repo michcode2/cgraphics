@@ -17,7 +17,7 @@ pub struct Scene {
 }
 
 // max number of bounces
-const DEPTH: u8 = 20;
+const DEPTH: u8 = 0;
 
 impl Scene {
     pub fn test_intersections(&self, ray: Ray, current_depth: u8) -> Intersection {
@@ -48,11 +48,42 @@ impl Scene {
         // order all the objects by how far they are and return the closest one
         all_objects.sort();
 
-        if let Some(_) = all_objects[0].normal {
-            return all_objects[0];
+        //println!(
+        //    "{:?}\n",
+        //    all_objects
+        //        .iter()
+        //        .map(|c| c.distance)
+        //        .collect::<Vec<Option<f32>>>()
+        //);
+
+        if all_objects
+            .iter()
+            .filter(|b| b.distance != None)
+            .collect::<Vec<_>>()
+            .len()
+            > 2
+        {
+            println!(
+                "{} {:?}\n",
+                all_objects
+                    .iter()
+                    .filter(|b| b.distance != None)
+                    .collect::<Vec<_>>()
+                    .len(),
+                all_objects
+                    .iter()
+                    .map(|c| (c.distance, c.colour))
+                    .collect::<Vec<_>>()
+            );
+        }
+
+        let index = 0;
+
+        if let Some(_) = all_objects[index].normal {
+            return all_objects[index];
         } else {
-            all_objects[0].colour = all_objects[0].colour + Rgba::from_gray(-0.01);
-            return all_objects[0];
+            all_objects[index].colour = all_objects[index].colour + Rgba::from_gray(-0.01);
+            return all_objects[index];
         }
     }
 

@@ -31,7 +31,7 @@ impl Intersect for Triangle {
                 //println!("{:?}", v);
                 let bounded = |h: f32| h > 0.0 && h < 1.0;
                 if bounded(sum) && bounded(v.x) && bounded(v.y) {
-                    potential.colour = Rgba::from_rgb(1.0, 0.0, 0.0);
+                    potential.colour = Rgba::from_rgb(0.0, 1.0, 0.0);
                     return potential;
                 }
             }

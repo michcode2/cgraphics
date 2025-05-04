@@ -1,5 +1,5 @@
 use eframe::egui::Rgba;
-use nalgebra::{Matrix2x3, Matrix3, Matrix3x2, Vector2, Vector3};
+use nalgebra::{Matrix3, Vector3};
 
 use crate::{
     intersect::{self, Intersect, Intersection},
