@@ -36,8 +36,8 @@ impl Default for RenderApp {
     // runs once at the start
     fn default() -> Self {
         // these are the wrong way round teehee
-        let width = 900;
-        let height = 800;
+        let width = 400;
+        let height = 400;
 
         // make the buffer
         let row = (0..width)
