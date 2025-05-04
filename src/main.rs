@@ -10,6 +10,7 @@ mod plane;
 mod renderer;
 mod scene;
 mod sphere;
+mod triangle;
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
@@ -47,7 +48,7 @@ impl Default for RenderApp {
         let buffer = (0..height).map(|_| row.clone()).collect::<Vec<Vec<Rgba>>>();
 
         // set up camera
-        let ray_location = nalgebra::Vector3::new(-10.0, 0.0, 0.0);
+        let ray_location = nalgebra::Vector3::new(-10.0, 0.0, 1.0);
         let ray_direction = nalgebra::Vector3::new(1.0, 0.0, 0.0);
         let origin_ray = Ray::new_preserve(ray_location, ray_direction);
 

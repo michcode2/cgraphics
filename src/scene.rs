@@ -7,6 +7,7 @@ use crate::{
     plane,
     renderer::Ray,
     sphere::Sphere,
+    triangle,
 };
 
 #[derive(Clone)]
@@ -16,7 +17,7 @@ pub struct Scene {
 }
 
 // max number of bounces
-const DEPTH: u8 = 5;
+const DEPTH: u8 = 20;
 
 impl Scene {
     pub fn test_intersections(&self, ray: Ray, current_depth: u8) -> Intersection {
@@ -91,9 +92,15 @@ impl Scene {
     pub fn pondering_orbs() -> Scene {
         let a = Vector3::new(0.0, 0.0, 0.0);
         let b = Vector3::new(1.0, 0.0, 0.0);
-        let c = Vector3::new(0.0, 1.0, -0.1);
+        let c = Vector3::new(0.1, 1.0, -0.1);
 
-        let plane = plane::Plane::from_3_points(a, b, c);
+        let plane = plane::Plane::from_3_points(&a, &b, &c);
+
+        let d = Vector3::new(-6.0, 1.0, 1.0);
+        let e = Vector3::new(-5.0, 3.0, 2.0);
+        let f = Vector3::new(-6.0, 2.5, 3.0);
+
+        let triangle = triangle::Triangle::from_3_points(&d, &e, &f);
 
         let objects = vec![
             Intersectable::Sphere(Sphere {
@@ -116,6 +123,22 @@ impl Scene {
                 1.0,
             )),
             Intersectable::Plane(plane),
+            Intersectable::Triangle(triangle),
+            Intersectable::Sphere(Sphere {
+                origin: d,
+                radius: 0.1,
+                colour: Rgba::from_rgb(1.0, 0.0, 0.0),
+            }),
+            Intersectable::Sphere(Sphere {
+                origin: e,
+                radius: 0.1,
+                colour: Rgba::from_rgb(1.0, 0.0, 0.0),
+            }),
+            Intersectable::Sphere(Sphere {
+                origin: f,
+                radius: 0.1,
+                colour: Rgba::from_rgb(1.0, 0.0, 0.0),
+            }),
         ];
         Scene {
             objects,
