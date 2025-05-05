@@ -4,6 +4,7 @@ use nalgebra::Vector3;
 use renderer::Ray;
 use scene::Scene;
 mod camera;
+mod importers;
 mod intersect;
 mod light;
 mod plane;
@@ -37,8 +38,8 @@ impl Default for RenderApp {
     // runs once at the start
     fn default() -> Self {
         // these are the wrong way round teehee
-        let width = 900;
-        let height = 900;
+        let width = 100;
+        let height = 100;
 
         // make the buffer
         let row = (0..width)
@@ -48,7 +49,7 @@ impl Default for RenderApp {
         let buffer = (0..height).map(|_| row.clone()).collect::<Vec<Vec<Rgba>>>();
 
         // set up camera
-        let ray_location = nalgebra::Vector3::new(-10.0, 0.0, 1.0);
+        let ray_location = nalgebra::Vector3::new(-3.0, 0.0, 1.0);
         let ray_direction = nalgebra::Vector3::new(1.0, 0.0, 0.0);
         let origin_ray = Ray::new_preserve(ray_location, ray_direction);
 
@@ -61,7 +62,7 @@ impl Default for RenderApp {
         RenderApp {
             buffer,
             camera,
-            scene: Scene::from_csv(String::from("many_tris.csv")),
+            scene: Scene::from_csv(String::from("blender/test.csv")),
         }
     }
 }

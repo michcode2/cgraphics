@@ -186,7 +186,7 @@ impl Scene {
             input.remove(0);
             let numbers = input
                 .into_iter()
-                .map(|val: &str| val.parse::<f32>().unwrap())
+                .map(|val: &str| val.parse::<f32>().expect(&format!("yikes! {}", val)))
                 .collect::<Vec<f32>>();
 
             let origin = Vector3::new(numbers[0], numbers[1], numbers[2]);
