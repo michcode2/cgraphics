@@ -9,13 +9,20 @@ use crate::{
 #[derive(Clone, Copy, Debug)]
 pub struct Triangle {
     inner_plane: Plane,
+    colour: Rgba,
 }
 
 impl Triangle {
     #[allow(non_snake_case)]
-    pub fn from_3_points(A: &Vector3<f32>, B: &Vector3<f32>, C: &Vector3<f32>) -> Triangle {
+    pub fn from_3_points(
+        A: &Vector3<f32>,
+        B: &Vector3<f32>,
+        C: &Vector3<f32>,
+        colour: Rgba,
+    ) -> Triangle {
         Triangle {
             inner_plane: Plane::from_3_points(A, B, C),
+            colour,
         }
     }
 }
@@ -31,7 +38,7 @@ impl Intersect for Triangle {
                 //println!("{:?}", v);
                 let bounded = |h: f32| h > 0.0 && h < 1.0;
                 if bounded(sum) && bounded(v.x) && bounded(v.y) {
-                    potential.colour = Rgba::from_rgb(0.0, 1.0, 0.0);
+                    potential.colour = self.colour;
                     return potential;
                 }
             }

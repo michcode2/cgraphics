@@ -61,7 +61,7 @@ impl Default for RenderApp {
         RenderApp {
             buffer,
             camera,
-            scene: Scene::pondering_orbs(),
+            scene: Scene::from_csv(String::from("many_tris.csv")),
         }
     }
 }
@@ -86,8 +86,8 @@ impl eframe::App for RenderApp {
                         Key::D => self.camera.move_by(Vector3::new(0.0, 0.1, 0.0)),
                         Key::Z => self.camera.move_by(Vector3::new(0.0, 0.0, 0.1)),
                         Key::X => self.camera.move_by(Vector3::new(0.0, 0.0, -0.1)),
-                        Key::ArrowLeft => self.camera.rotate_horizontal(0.1),
-                        Key::ArrowRight => self.camera.rotate_horizontal(-0.1),
+                        Key::ArrowLeft => self.camera.rotate_horizontal(0.05),
+                        Key::ArrowRight => self.camera.rotate_horizontal(-0.05),
                         _ => (),
                     }
                 }

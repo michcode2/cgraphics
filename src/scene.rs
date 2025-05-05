@@ -7,7 +7,7 @@ use crate::{
     plane,
     renderer::Ray,
     sphere::Sphere,
-    triangle,
+    triangle::{self, Triangle},
 };
 
 #[derive(Clone)]
@@ -17,7 +17,7 @@ pub struct Scene {
 }
 
 // max number of bounces
-const DEPTH: u8 = 20;
+const DEPTH: u8 = 10;
 
 impl Scene {
     pub fn test_intersections(&self, ray: Ray, current_depth: u8) -> Intersection {
@@ -102,7 +102,7 @@ impl Scene {
         let e = Vector3::new(-5.0, 3.0, 2.0);
         let f = Vector3::new(-6.0, 2.5, 3.0);
 
-        let triangle = triangle::Triangle::from_3_points(&d, &e, &f);
+        let triangle = triangle::Triangle::from_3_points(&d, &e, &f, Rgba::from_rgb(0.0, 1.0, 0.0));
 
         let objects = vec![
             Intersectable::Sphere(Sphere {
@@ -158,6 +158,67 @@ impl Scene {
             }),
             Intersectable::PointLight(PointLight::new(nalgebra::Vector3::new(9.0, 0.0, 0.0), 1.0)),
         ];
+        Scene {
+            objects,
+            max_depth: DEPTH,
+        }
+    }
+
+    pub fn from_csv(path: String) -> Scene {
+        let mut objects: Vec<Intersectable> = vec![];
+
+        let make_sphere = |mut input: Vec<&str>| {
+            input.remove(0);
+            let numbers = input
+                .into_iter()
+                .map(|val: &str| val.parse::<f32>().unwrap())
+                .collect::<Vec<f32>>();
+
+            let object = Sphere {
+                origin: Vector3::new(numbers[0], numbers[1], numbers[2]),
+                radius: numbers[3],
+                colour: Rgba::from_rgb(numbers[4], numbers[5], numbers[6]),
+            };
+            return Intersectable::Sphere(object);
+        };
+
+        let make_light = |mut input: Vec<&str>| {
+            input.remove(0);
+            let numbers = input
+                .into_iter()
+                .map(|val: &str| val.parse::<f32>().unwrap())
+                .collect::<Vec<f32>>();
+
+            let origin = Vector3::new(numbers[0], numbers[1], numbers[2]);
+            let object = PointLight::new(origin, numbers[3]);
+            return Intersectable::PointLight(object);
+        };
+
+        let make_triangle = |mut input: Vec<&str>| {
+            input.remove(0);
+            let numbers = input
+                .into_iter()
+                .map(|val: &str| val.parse::<f32>().unwrap())
+                .collect::<Vec<f32>>();
+
+            let a = Vector3::new(numbers[0], numbers[1], numbers[2]);
+            let b = Vector3::new(numbers[3], numbers[4], numbers[5]);
+            let c = Vector3::new(numbers[6], numbers[7], numbers[8]);
+            let colour = Rgba::from_rgb(numbers[9], numbers[10], numbers[11]);
+            let tri = Triangle::from_3_points(&a, &b, &c, colour);
+            return Intersectable::Triangle(tri);
+        };
+
+        let lines = std::fs::read_to_string(path).unwrap();
+        for line in lines.lines() {
+            let data = line.split(",").collect::<Vec<&str>>();
+            match data[0] {
+                "s" => objects.push(make_sphere(data)),
+                "l" => objects.push(make_light(data)),
+                "t" => objects.push(make_triangle(data)),
+                _ => println!("bad input: {:?}", line),
+            }
+        }
         Scene {
             objects,
             max_depth: DEPTH,
