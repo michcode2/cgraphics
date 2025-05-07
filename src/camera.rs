@@ -35,7 +35,8 @@ impl Camera {
 
                 //println!("{}, {}", x, y);
                 // do the calculations and put it in the buffer
-                let color = scene.test_intersections(pixel_ray, 0).colour;
+                //let color = scene.test_intersections(pixel_ray, 0).colour;
+                let color = scene.test_intersections_vec(pixel_ray).colour;
                 buffer[x as usize][y as usize] = color;
             }
         }

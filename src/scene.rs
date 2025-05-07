@@ -17,7 +17,7 @@ pub struct Scene {
 }
 
 // max number of bounces
-const DEPTH: u8 = 10;
+const DEPTH: u8 = 4;
 
 impl Scene {
     pub fn test_intersections(&self, ray: Ray, current_depth: u8) -> Intersection {
@@ -28,34 +28,71 @@ impl Scene {
             .iter()
             // go over each object in the scene and find the intersections
             .map(|obj| obj.test_intersection(&ray))
-            .map(|mut intersect| {
-                // if the normal is a value, it implies that something has been hit
-                if let Some(ray_new) = intersect.normal {
-                    // do another bounce if theres still bounces avaliable
-                    if current_depth < self.max_depth {
-                        let result = self.test_intersections(ray_new, current_depth + 1);
-                        // adjust the colour a little bit
-                        intersect.colour = result.colour + intersect.colour.multiply(0.2);
-                        return intersect;
-                    } else {
-                        return intersect;
-                    }
-                } else {
-                    return intersect;
-                }
-            })
             .collect::<Vec<Intersection>>();
-        // order all the objects by how far they are and return the closest one
         all_objects.sort();
+
+        let mut intersect = all_objects[0]; // if the normal is a value, it implies that something has been hit
+        if let Some(ray_new) = intersect.normal {
+            // do another bounce if theres still bounces avaliable
+            if current_depth < self.max_depth {
+                let result = self.test_intersections(ray_new, current_depth + 1);
+                // adjust the colour a little bit
+                intersect.colour = result.colour + intersect.colour.multiply(0.2);
+            }
+        };
+        // order all the objects by how far they are and return the closest one
 
         let index = 0;
 
-        if let Some(_) = all_objects[index].normal {
-            return all_objects[index];
+        let mut return_value = intersect;
+
+        if let Some(_) = return_value.normal {
+            return return_value;
         } else {
-            all_objects[index].colour = all_objects[index].colour + Rgba::from_gray(-0.01);
-            return all_objects[index];
+            return_value.colour = return_value.colour + Rgba::from_gray(-0.01);
+            return return_value;
         }
+    }
+
+    pub fn test_intersections_vec(&self, ray: Ray) -> Intersection {
+        let mut to_process = vec![(ray, 0)];
+        let mut colours = vec![];
+
+        let mut final_intersection = Intersection {
+            colour: Rgba::BLACK,
+            distance: None,
+            normal: None,
+        };
+        while let Some((this_ray, depth)) = to_process.pop() {
+            if depth > self.max_depth {
+                break;
+            }
+            let mut intersections = self
+                .objects
+                .iter()
+                .map(|obj| obj.test_intersection(&this_ray))
+                .collect::<Vec<Intersection>>();
+            intersections.sort();
+
+            if depth == 0 {
+                final_intersection = intersections[0];
+            } else {
+                colours.push(intersections[0].colour)
+            }
+            if let Some(reflection) = intersections[0].normal {
+                to_process.push((reflection, depth + 1));
+            } else {
+                break;
+            }
+        }
+
+        colours.reverse();
+
+        colours
+            .iter()
+            .for_each(|&c| final_intersection.colour = final_intersection.colour + c.multiply(1.0));
+
+        return final_intersection;
     }
 
     #[allow(dead_code)]

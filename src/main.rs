@@ -5,7 +5,6 @@ use renderer::Ray;
 use scene::Scene;
 mod camera;
 mod importers;
-mod intersect;
 mod light;
 mod plane;
 mod renderer;
@@ -38,8 +37,8 @@ impl Default for RenderApp {
     // runs once at the start
     fn default() -> Self {
         // these are the wrong way round teehee
-        let width = 100;
-        let height = 100;
+        let width = 400;
+        let height = 400;
 
         // make the buffer
         let row = (0..width)
@@ -63,6 +62,7 @@ impl Default for RenderApp {
             buffer,
             camera,
             scene: Scene::from_csv(String::from("blender/test.csv")),
+            //scene: Scene::pondering_orbs(),
         }
     }
 }
