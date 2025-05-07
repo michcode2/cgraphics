@@ -28,10 +28,10 @@ impl Scene {
             .iter()
             // go over each object in the scene and find the intersections
             .map(|obj| obj.test_intersection(&ray))
-            .collect::<Vec<Intersection>>();
-        all_objects.sort();
+            .min()
+            .unwrap();
 
-        let mut intersect = all_objects[0]; // if the normal is a value, it implies that something has been hit
+        let mut intersect = all_objects; // if the normal is a value, it implies that something has been hit
         if let Some(ray_new) = intersect.normal {
             // do another bounce if theres still bounces avaliable
             if current_depth < self.max_depth {

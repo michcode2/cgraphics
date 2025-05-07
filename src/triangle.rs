@@ -44,7 +44,7 @@ impl Intersect for Triangle {
             }
         }
         return Intersection {
-            colour: Rgba::from_gray(0.5),
+            colour: Rgba::BLACK,
             distance: None,
             normal: None,
         };

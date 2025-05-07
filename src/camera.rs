@@ -1,5 +1,6 @@
 use eframe::egui::Rgba;
 use nalgebra::Vector3;
+use rayon::iter::{ParallelBridge, ParallelIterator};
 
 use crate::{renderer::Ray, scene::Scene};
 
@@ -17,28 +18,32 @@ impl Camera {
             vec![vec![Rgba::from_gray(0.0); self.height as usize]; self.width as usize];
 
         for x in 0..self.width {
-            for y in 0..self.height {
-                // each dimension on screen should be a point from -1 to 1
-                let x_normalised = ((-2.0 * x as f32) / self.width as f32) + 1.0;
-                let y_normalised = ((2.0 * y as f32) / self.height as f32) - 1.0;
+            let array = (0..self.height)
+                .par_bridge()
+                .map(|y| {
+                    // each dimension on screen should be a point from -1 to 1
+                    let x_normalised = ((-2.0 * x as f32) / self.width as f32) + 1.0;
+                    let y_normalised = ((2.0 * y as f32) / self.height as f32) - 1.0;
 
-                let pixel_direction = nalgebra::Vector3::new(
-                    -y_normalised * self.get_direction_horizontal().sin(), // who up rotating
-                    y_normalised * self.get_direction_horizontal().cos(),  // their matrix
-                    x_normalised, // this will need to get an update when the camera can change pitch and it is not defined as the z coordinate
-                );
+                    let pixel_direction = nalgebra::Vector3::new(
+                        -y_normalised * self.get_direction_horizontal().sin(), // who up rotating
+                        y_normalised * self.get_direction_horizontal().cos(),  // their matrix
+                        x_normalised, // this will need to get an update when the camera can change pitch and it is not defined as the z coordinate
+                    );
 
-                let pixel_ray = Ray::new(
-                    self.location.origin,
-                    pixel_direction + self.location.direction,
-                );
+                    let pixel_ray = Ray::new(
+                        self.location.origin,
+                        pixel_direction + self.location.direction,
+                    );
 
-                //println!("{}, {}", x, y);
-                // do the calculations and put it in the buffer
-                //let color = scene.test_intersections(pixel_ray, 0).colour;
-                let color = scene.test_intersections_vec(pixel_ray).colour;
-                buffer[x as usize][y as usize] = color;
-            }
+                    //println!("{}, {}", x, y);
+                    // do the calculations and put it in the buffer
+                    //let color = scene.test_intersections(pixel_ray, 0).colour;
+                    let color = scene.test_intersections(pixel_ray, 0).colour;
+                    return color;
+                })
+                .collect();
+            buffer[x as usize] = array;
         }
         buffer
     }
