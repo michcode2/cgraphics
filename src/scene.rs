@@ -23,7 +23,7 @@ impl Scene {
     pub fn test_intersections(&self, ray: Ray, current_depth: u8) -> Intersection {
         // go over each object in the scene
         //println!("{}", current_depth);
-        let mut all_objects = self
+        let all_objects = self
             .objects
             .iter()
             // go over each object in the scene and find the intersections
@@ -42,8 +42,6 @@ impl Scene {
         };
         // order all the objects by how far they are and return the closest one
 
-        let index = 0;
-
         let mut return_value = intersect;
 
         if let Some(_) = return_value.normal {
@@ -54,7 +52,9 @@ impl Scene {
         }
     }
 
+    #[allow(dead_code)]
     pub fn test_intersections_vec(&self, ray: Ray) -> Intersection {
+        // this is being kept around because if i get smart, maybe it will come in handy to give me more control
         let mut to_process = vec![(ray, 0)];
         let mut colours = vec![];
 

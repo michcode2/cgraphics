@@ -1,6 +1,6 @@
 use eframe::egui::Rgba;
 use nalgebra::Vector3;
-use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 use crate::{renderer::Ray, scene::Scene};
 

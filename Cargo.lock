@@ -602,6 +602,7 @@ version = "0.1.0"
 dependencies = [
  "eframe",
  "egui_extras",
+ "epaint",
  "nalgebra",
  "rayon",
  "serde_json",
