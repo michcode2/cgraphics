@@ -61,8 +61,8 @@ impl Default for RenderApp {
         RenderApp {
             buffer,
             camera,
-            scene: Scene::from_csv(String::from("blender/test.csv")),
-            //scene: Scene::pondering_orbs(),
+            //scene: Scene::from_csv(String::from("blender/test.csv")),
+            scene: Scene::pondering_orbs(),
         }
     }
 }

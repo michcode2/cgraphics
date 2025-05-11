@@ -139,7 +139,7 @@ impl Scene {
         let e = Vector3::new(-5.0, 3.0, 2.0);
         let f = Vector3::new(-6.0, 2.5, 3.0);
 
-        let triangle = triangle::Triangle::from_3_points(&d, &e, &f, Rgba::from_rgb(0.0, 1.0, 0.0));
+        let triangle = triangle::Triangle::from_3_points(&e, &d, &f, Rgba::from_rgb(0.0, 1.0, 0.0));
 
         let objects = vec![
             Intersectable::Sphere(Sphere {
