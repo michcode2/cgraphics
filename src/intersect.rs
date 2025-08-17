@@ -2,9 +2,9 @@ use std::cmp::Ordering;
 
 use eframe::egui::Rgba;
 
-use crate::{light, plane, renderer::Ray, sphere, triangle};
+use crate::renderer::Ray;
 
-pub trait Intersect {
+pub trait Intersect: Send + Sync {
     fn test_intersection(&self, ray: &Ray) -> Intersection;
 }
 
@@ -59,24 +59,5 @@ impl PartialOrd for Intersection {
 impl Ord for Intersection {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.partial_cmp(other).unwrap_or(Ordering::Equal)
-    }
-}
-
-#[derive(Clone, Copy)]
-pub enum Intersectable {
-    Sphere(sphere::Sphere),
-    PointLight(light::PointLight),
-    Plane(plane::Plane),
-    Triangle(triangle::Triangle),
-}
-
-impl Intersect for Intersectable {
-    fn test_intersection(&self, ray: &Ray) -> Intersection {
-        match self {
-            Intersectable::Sphere(s) => s.test_intersection(ray),
-            Intersectable::PointLight(l) => l.test_intersection(ray),
-            Intersectable::Plane(p) => p.test_intersection(ray),
-            Intersectable::Triangle(t) => t.test_intersection(ray),
-        }
     }
 }

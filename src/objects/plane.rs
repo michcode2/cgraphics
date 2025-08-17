@@ -57,11 +57,11 @@ impl Intersect for Plane {
         }
         // need epsilon otherwise it gets specely
         let eps = 1e-3;
-        let normal_ray = Ray::new(ray.at_point(t_int + eps), self.normal);
+        //let normal_ray = Ray::new(ray.at_point(t_int + eps), self.normal);
 
         let delta = ray.direction + self.normal;
 
-        let reflected_ray = Ray::new(ray.at_point(t_int + eps), (delta + delta) - ray.direction);
+        let reflected_ray = Ray::new(ray.at_point(t_int + eps), (delta) - ray.direction);
 
         return Intersection::new(Rgba::from_gray(0.5), Some(t_int), Some(reflected_ray));
     }

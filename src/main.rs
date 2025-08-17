@@ -5,16 +5,13 @@ use renderer::Ray;
 use scene::Scene;
 mod camera;
 mod intersect;
-mod light;
-mod plane;
+mod objects;
 mod renderer;
 mod scene;
-mod sphere;
-mod triangle;
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size([820.0, 820.0]),
+        viewport: egui::ViewportBuilder::default().with_inner_size([420.0, 420.0]),
         ..Default::default()
     };
     eframe::run_native(
@@ -61,7 +58,7 @@ impl Default for RenderApp {
         RenderApp {
             buffer,
             camera,
-            //scene: Scene::from_csv(String::from("blender/test.csv")),
+            //scene: Scene::from_csv(String::from("blender/monky.csv")),
             scene: Scene::pondering_orbs(),
         }
     }

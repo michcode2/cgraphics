@@ -1,18 +1,20 @@
+use std::sync::Arc;
+
 use eframe::egui::Rgba;
 use nalgebra::Vector3;
 
 use crate::{
-    intersect::{Intersect, Intersectable, Intersection},
-    light::{self, PointLight},
-    plane,
+    intersect::{Intersect, Intersection},
+    objects::light::{self, PointLight},
+    objects::plane,
+    objects::sphere::Sphere,
+    objects::triangle::{self, Triangle},
     renderer::Ray,
-    sphere::Sphere,
-    triangle::{self, Triangle},
 };
 
 #[derive(Clone)]
 pub struct Scene {
-    objects: Vec<Intersectable>,
+    objects: Vec<Arc<dyn Intersect>>,
     max_depth: u8,
 }
 
@@ -97,26 +99,26 @@ impl Scene {
 
     #[allow(dead_code)]
     pub fn curve() -> Scene {
-        let mut objects = vec![];
+        let mut objects: Vec<Arc<dyn Intersect>> = vec![];
 
         let num_balls = 100;
         let extent = 10.0;
 
         for i in 0..num_balls {
             let y = -extent + (i as f32 * extent * 2.0 / num_balls as f32);
-            objects.push(Intersectable::Sphere(Sphere {
+            objects.push(Arc::new(Sphere {
                 origin: nalgebra::Vector3::new(3.0, y, 2.0 * (y).sin() + 0.1 * y.powi(2)),
                 radius: 0.1,
                 colour: Rgba::from_white_alpha(1.0),
             }));
         }
 
-        objects.push(Intersectable::PointLight(light::PointLight::new(
+        objects.push(Arc::new(light::PointLight::new(
             nalgebra::Vector3::new(-12.0, -12.0, 20.0),
             1.0,
         )));
 
-        objects.push(Intersectable::PointLight(light::PointLight::new(
+        objects.push(Arc::new(light::PointLight::new(
             nalgebra::Vector3::new(-12.0, 12.0, 20.0),
             1.0,
         )));
@@ -135,45 +137,45 @@ impl Scene {
 
         let plane = plane::Plane::from_3_points(&a, &b, &c);
 
-        let d = Vector3::new(-6.0, 1.0, 1.0);
-        let e = Vector3::new(-5.0, 3.0, 2.0);
-        let f = Vector3::new(-6.0, 2.5, 3.0);
+        let d = Vector3::new(-7.0, 4.0, 1.0);
+        let e = Vector3::new(-0.0, 4.0, 1.0);
+        let f = Vector3::new(-7.0, 4.0, 3.0);
 
         let triangle = triangle::Triangle::from_3_points(&e, &d, &f, Rgba::from_rgb(0.0, 1.0, 0.0));
 
-        let objects = vec![
-            Intersectable::Sphere(Sphere {
+        let objects: Vec<Arc<dyn Intersect>> = vec![
+            Arc::new(Sphere {
                 origin: nalgebra::Vector3::new(3.0, 8.0, 8.0),
                 radius: 1.0,
                 colour: Rgba::from_white_alpha(1.0),
             }),
-            Intersectable::Sphere(Sphere {
+            Arc::new(Sphere {
                 origin: nalgebra::Vector3::new(3.0, 5.0, 5.0),
                 radius: 1.0,
                 colour: Rgba::from_white_alpha(1.0),
             }),
-            Intersectable::Sphere(Sphere {
+            Arc::new(Sphere {
                 origin: nalgebra::Vector3::new(0.0, 3.6, 3.9),
                 radius: 0.5,
                 colour: Rgba::from_rgb(1.0, 0.0, 0.0),
             }),
-            Intersectable::PointLight(PointLight::new(
+            Arc::new(PointLight::new(
                 nalgebra::Vector3::new(12.0, 0.0, 10.0),
                 1.0,
             )),
-            Intersectable::Plane(plane),
-            Intersectable::Triangle(triangle),
-            Intersectable::Sphere(Sphere {
+            Arc::new(plane),
+            Arc::new(triangle),
+            Arc::new(Sphere {
                 origin: d,
                 radius: 0.1,
                 colour: Rgba::from_rgb(1.0, 0.0, 0.0),
             }),
-            Intersectable::Sphere(Sphere {
+            Arc::new(Sphere {
                 origin: e,
                 radius: 0.1,
                 colour: Rgba::from_rgb(1.0, 0.0, 0.0),
             }),
-            Intersectable::Sphere(Sphere {
+            Arc::new(Sphere {
                 origin: f,
                 radius: 0.1,
                 colour: Rgba::from_rgb(1.0, 0.0, 0.0),
@@ -187,13 +189,13 @@ impl Scene {
 
     #[allow(dead_code)]
     pub fn eclipse() -> Scene {
-        let objects = vec![
-            Intersectable::Sphere(Sphere {
+        let objects: Vec<Arc<dyn Intersect>> = vec![
+            Arc::new(Sphere {
                 origin: nalgebra::Vector3::new(3.0, 0.0, 0.0),
                 radius: 1.0,
                 colour: Rgba::from_white_alpha(1.0),
             }),
-            Intersectable::PointLight(PointLight::new(nalgebra::Vector3::new(9.0, 0.0, 0.0), 1.0)),
+            Arc::new(PointLight::new(nalgebra::Vector3::new(9.0, 0.0, 0.0), 1.0)),
         ];
         Scene {
             objects,
@@ -201,8 +203,9 @@ impl Scene {
         }
     }
 
+    #[allow(dead_code)]
     pub fn from_csv(path: String) -> Scene {
-        let mut objects: Vec<Intersectable> = vec![];
+        let mut objects: Vec<Arc<dyn Intersect>> = vec![];
 
         let make_sphere = |mut input: Vec<&str>| {
             input.remove(0);
@@ -216,7 +219,7 @@ impl Scene {
                 radius: numbers[3],
                 colour: Rgba::from_rgb(numbers[4], numbers[5], numbers[6]),
             };
-            return Intersectable::Sphere(object);
+            return Arc::new(object);
         };
 
         let make_light = |mut input: Vec<&str>| {
@@ -228,7 +231,7 @@ impl Scene {
 
             let origin = Vector3::new(numbers[0], numbers[1], numbers[2]);
             let object = PointLight::new(origin, numbers[3]);
-            return Intersectable::PointLight(object);
+            return Arc::new(object);
         };
 
         let make_triangle = |mut input: Vec<&str>| {
@@ -243,7 +246,7 @@ impl Scene {
             let c = Vector3::new(numbers[6], numbers[7], numbers[8]);
             let colour = Rgba::from_rgb(numbers[9], numbers[10], numbers[11]);
             let tri = Triangle::from_3_points(&a, &b, &c, colour);
-            return Intersectable::Triangle(tri);
+            return Arc::new(tri);
         };
 
         let lines = std::fs::read_to_string(path).unwrap();

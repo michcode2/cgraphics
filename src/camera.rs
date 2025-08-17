@@ -13,10 +13,12 @@ pub struct Camera {
 impl Camera {
     // calls the render function on the provided scene for eah pixel and put it where it should be
     pub fn create_buffer(&self, scene: &Scene) -> Vec<Vec<Rgba>> {
+        let scene_temp = scene.clone();
         // init the buffer to pure black
         let array_of_arrays = (0..self.width)
             .into_par_iter()
             .map(|x| {
+                let scene_temp_temp = scene_temp.clone();
                 (0..self.height)
                     .into_par_iter()
                     .map(|y| {
@@ -38,7 +40,7 @@ impl Camera {
                         //println!("{}, {}", x, y);
                         // do the calculations and put it in the buffer
                         //let color = scene.test_intersections(pixel_ray, 0).colour;
-                        let color = scene.test_intersections(pixel_ray, 0).colour;
+                        let color = scene_temp_temp.test_intersections(pixel_ray, 0).colour;
                         return color;
                     })
                     .collect::<Vec<Rgba>>()

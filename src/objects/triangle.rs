@@ -3,7 +3,7 @@ use nalgebra::Vector3;
 
 use crate::{
     intersect::{Intersect, Intersection},
-    plane::Plane,
+    objects::plane::Plane,
 };
 
 #[derive(Clone, Copy, Debug)]

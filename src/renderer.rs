@@ -4,7 +4,7 @@ use eframe::egui::Rgba;
 use nalgebra::{self, Vector3};
 
 use crate::intersect::{Intersect, Intersection};
-use crate::sphere::Sphere;
+use crate::objects::sphere::Sphere;
 
 #[allow(dead_code)]
 // the little smiley face
