@@ -2,7 +2,7 @@ use epaint::Rgba;
 
 use crate::surfaces::Surface;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Specular {
     self_colour: Rgba,
 }

@@ -60,7 +60,7 @@ impl Default for RenderApp {
             buffer,
             camera,
             //scene: Scene::from_csv(String::from("blender/monky.csv")),
-            scene: Scene::eclipse(),
+            scene: Scene::pondering_orbs(),
         }
     }
 }

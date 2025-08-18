@@ -1,6 +1,6 @@
 use epaint::Rgba;
 
-use crate::intersect::{Intersect, Intersection};
+use crate::intersect::{Intersect, Intersection, TestIntersectionResult};
 
 pub struct WorldLight {}
 
@@ -9,11 +9,14 @@ impl Intersect for WorldLight {
         &self,
         _: &crate::renderer::Ray,
         _: epaint::Rgba,
-    ) -> crate::intersect::Intersection {
-        return Intersection {
-            colour: Rgba::from_gray(0.01),
-            distance: Some(f32::MAX),
-            normal: None,
-        };
+    ) -> TestIntersectionResult {
+        return TestIntersectionResult(
+            Intersection {
+                colour: Rgba::from_gray(0.01),
+                distance: Some(f32::MAX),
+                normal: None,
+            },
+            None,
+        );
     }
 }

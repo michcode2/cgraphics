@@ -1,11 +1,32 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, sync::Arc};
 
 use eframe::egui::Rgba;
 
-use crate::renderer::Ray;
+use crate::{renderer::Ray, surfaces::Surface};
+
+#[derive(Clone)]
+pub struct TestIntersectionResult(pub Intersection, pub Option<Arc<dyn Surface>>);
+impl PartialOrd for TestIntersectionResult {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.0.partial_cmp(&other.0)
+    }
+}
+impl PartialEq for TestIntersectionResult {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl Ord for TestIntersectionResult {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap_or(Ordering::Equal)
+    }
+}
+
+impl Eq for TestIntersectionResult {}
 
 pub trait Intersect: Send + Sync {
-    fn test_intersection(&self, ray: &Ray, incoming_colour: Rgba) -> Intersection;
+    fn test_intersection(&self, ray: &Ray, incoming_colour: Rgba) -> TestIntersectionResult;
 }
 
 #[derive(Clone, Copy, Debug)]

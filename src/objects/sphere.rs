@@ -4,7 +4,7 @@ use eframe::egui::Rgba;
 use nalgebra;
 
 use crate::{
-    intersect::{Intersect, Intersection},
+    intersect::{Intersect, Intersection, TestIntersectionResult},
     renderer::Ray,
     surfaces::{specular::Specular, Surface},
 };
@@ -19,14 +19,17 @@ pub struct Sphere {
 #[allow(non_snake_case)]
 impl Intersect for Sphere {
     // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-Sphere-intersection.html
-    fn test_intersection(&self, ray: &Ray, colour: Rgba) -> Intersection {
+    fn test_intersection(&self, ray: &Ray, colour: Rgba) -> TestIntersectionResult {
         let L = self.origin - ray.origin;
         let t_ca = L.dot(&ray.direction);
 
         // return black if the sphere is behind the camera
         let background = 0.0;
         if t_ca <= 0.0 {
-            return Intersection::new(Rgba::from_gray(background), None, None);
+            return TestIntersectionResult(
+                Intersection::new(Rgba::from_gray(background), None, None),
+                None,
+            );
         }
 
         let close_approach_point = ray.at_point(t_ca); // closest approach
@@ -44,17 +47,19 @@ impl Intersect for Sphere {
 
         // return the colour of the sphere if the ray intersects, else the background colour
         if distance < self.radius {
-            // println!(
-            //     "normal: {}, origin: {}, surface: {}",
-            //     normal_vec, self.origin, surface
-            // );
-            return Intersection::new(
-                self.surface.get_value(colour),
-                Some((surface - ray.origin).norm()),
-                Some(normal_ray),
+            return TestIntersectionResult(
+                Intersection::new(
+                    self.surface.get_value(colour),
+                    Some((surface - ray.origin).norm()),
+                    Some(normal_ray),
+                ),
+                Some(self.surface.clone()),
             );
         }
-        return Intersection::new(Rgba::from_gray(background), None, None);
+        return TestIntersectionResult(
+            Intersection::new(Rgba::from_gray(background), None, None),
+            None,
+        );
     }
 }
 

@@ -1,12 +1,15 @@
+use std::sync::Arc;
+
 use eframe::egui::Rgba;
 use nalgebra::{Matrix3, Vector3};
 
 use crate::{
-    intersect::{self, Intersect, Intersection},
+    intersect::{Intersect, Intersection, TestIntersectionResult},
     renderer::Ray,
+    surfaces::{diffuse, Surface},
 };
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 #[allow(unused)]
 pub struct Plane {
     normal: Vector3<f32>,
@@ -15,6 +18,7 @@ pub struct Plane {
     k: f32,
     origin: Vector3<f32>,
     inverse: Option<Matrix3<f32>>,
+    surface: Arc<dyn Surface>,
 }
 
 impl Plane {
@@ -34,7 +38,20 @@ impl Plane {
             k,
             origin: A.clone_owned(),
             inverse: simul_eq.try_inverse(),
+            surface: Arc::new(diffuse::Diffuse { colour: Rgba::BLUE }),
         }
+    }
+
+    #[allow(non_snake_case)]
+    pub fn from_3_points_and_surface(
+        A: &Vector3<f32>,
+        B: &Vector3<f32>,
+        C: &Vector3<f32>,
+        material: Arc<dyn Surface>,
+    ) -> Plane {
+        let mut temp = Plane::from_3_points(A, B, C);
+        temp.surface = material;
+        return temp;
     }
 
     pub fn in_plane_coords(&self, point: &Vector3<f32>) -> Option<Vector3<f32>> {
@@ -48,12 +65,15 @@ impl Plane {
 
 impl Intersect for Plane {
     #[allow(non_snake_case)]
-    fn test_intersection(&self, ray: &crate::renderer::Ray, _: Rgba) -> intersect::Intersection {
+    fn test_intersection(&self, ray: &crate::renderer::Ray, _: Rgba) -> TestIntersectionResult {
         // stolen from https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-plane-and-ray-disk-intersection.html
 
         let t_int = (self.origin - ray.origin).dot(&self.normal) / ray.direction.dot(&self.normal);
         if t_int < 0.0 {
-            return Intersection::new(Rgba::from_gray(0.0), None, None);
+            return TestIntersectionResult(
+                Intersection::new(Rgba::from_gray(0.0), None, None),
+                None,
+            );
         }
         // need epsilon otherwise it gets specely
         let eps = 1e-3;
@@ -63,6 +83,9 @@ impl Intersect for Plane {
 
         //let reflected_ray = Ray::new(ray.at_point(t_int + eps), (delta) - ray.direction);
 
-        return Intersection::new(Rgba::from_gray(0.5), Some(t_int), Some(normal_ray));
+        return TestIntersectionResult(
+            Intersection::new(Rgba::from_gray(0.5), Some(t_int), Some(normal_ray)),
+            Some(self.surface.clone()),
+        );
     }
 }

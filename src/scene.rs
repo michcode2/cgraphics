@@ -4,10 +4,13 @@ use eframe::egui::Rgba;
 use nalgebra::Vector3;
 
 use crate::{
-    intersect::{Intersect, Intersection},
+    intersect::{Intersect, Intersection, TestIntersectionResult},
     objects::*,
     renderer::Ray,
-    surfaces::diffuse,
+    surfaces::{
+        diffuse::{self, Diffuse},
+        specular::Specular,
+    },
 };
 
 #[derive(Clone)]
@@ -21,7 +24,7 @@ const DEPTH: u8 = 4;
 
 impl Scene {
     #[allow(dead_code)]
-    pub fn test_intersections(&self, ray: Ray, current_depth: u8) -> Intersection {
+    pub fn test_intersections(&self, ray: Ray, current_depth: u8) -> TestIntersectionResult {
         // go over each object in the scene
         //println!("{}", current_depth);
         let all_objects = self
@@ -29,37 +32,29 @@ impl Scene {
             .iter()
             // go over each object in the scene and find the intersections
             .map(|obj| obj.test_intersection(&ray, Rgba::from_gray(1.0)))
-            .min()
-            .unwrap();
+            .collect::<Vec<TestIntersectionResult>>();
 
-        let mut intersect = all_objects; // if the normal is a value, it implies that something has been hit
-        if let Some(ray_new) = intersect.normal {
+        let mut intersect = all_objects.clone().into_iter().min().unwrap(); // if the normal is a value, it implies that something has been hit
+
+        if let Some(ray_new) = intersect.0.normal {
             // do another bounce if theres still bounces avaliable
-            //let unit_incoming = ray.direction / ray.direction.norm();
-            //let unit_normal = ray_new.direction / ray_new.direction.norm();
-            //let normal_scaled = ray_new.direction.scale(unit_incoming.dot(&unit_normal));
             let reflected_direction: Vector3<f32> = ray.direction + ray_new.direction.scale(2.0);
-            /*+ (ray
-                    .direction
-                    .apply_norm(&EuclideanNorm)
-                    .dot(ray_new.direction.apply_norm(&EuclideanNorm))))
-            .norm();*/
             let reflected_ray = Ray::new_preserve(ray_new.origin, reflected_direction);
             if current_depth < self.max_depth {
                 let result = self.test_intersections(reflected_ray, current_depth + 1);
-                // adjust the colour a little bit
-                intersect.colour = result.colour;
+                // adjust the colour a littl
+                intersect.0.colour = intersect
+                    .clone()
+                    .1
+                    .unwrap_or(Arc::new(Diffuse {
+                        colour: Rgba::GREEN,
+                    }))
+                    .get_value(result.0.colour);
             }
         };
         // order all the objects by how far they are and return the closest one
 
-        let return_value = intersect;
-
-        if let Some(_) = return_value.normal {
-            return return_value;
-        } else {
-            return return_value;
-        }
+        return intersect;
     }
 
     #[allow(dead_code)]
@@ -77,7 +72,7 @@ impl Scene {
             let mut intersections = self
                 .objects
                 .iter()
-                .map(|obj| obj.test_intersection(&this_ray, Rgba::from_gray(0.0)))
+                .map(|obj| obj.test_intersection(&this_ray, Rgba::from_gray(0.0)).0)
                 .collect::<Vec<Intersection>>();
             intersections.sort();
 
@@ -151,7 +146,7 @@ impl Scene {
         let b = Vector3::new(1.0, 0.0, 0.0);
         let c = Vector3::new(0.1, 1.0, -0.1);
 
-        let plane = plane::Plane::from_3_points(&a, &b, &c);
+        let plane = plane::Plane::from_3_points_and_surface(&a, &b, &c, Arc::new(Specular::new()));
 
         let d = Vector3::new(-7.0, 4.0, 1.0);
         let e = Vector3::new(-0.0, 4.0, 1.0);
@@ -195,7 +190,7 @@ impl Scene {
             Arc::new(sphere::Sphere::with_shader(
                 nalgebra::Vector3::new(1.0, 0.0, 0.0),
                 0.8,
-                Arc::new(diffuse::Diffuse {}),
+                Arc::new(diffuse::Diffuse { colour: Rgba::BLUE }),
             )),
             Arc::new(light::PointLight::new(
                 nalgebra::Vector3::new(3.0, 0.0, 0.0),
