@@ -8,6 +8,7 @@ mod intersect;
 mod objects;
 mod renderer;
 mod scene;
+mod surfaces;
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
@@ -59,7 +60,7 @@ impl Default for RenderApp {
             buffer,
             camera,
             //scene: Scene::from_csv(String::from("blender/monky.csv")),
-            scene: Scene::pondering_orbs(),
+            scene: Scene::eclipse(),
         }
     }
 }
@@ -70,8 +71,10 @@ impl eframe::App for RenderApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             self.update_buffer_sharedstate();
             // tell self to tell the camera to render
-            let img =
-                egui_extras::image::RetainedImage::from_color_image("text", self.buffer_to_image());
+
+            let framebuffer = self.buffer_to_image();
+            //camera::Camera::save_to_file(&self.buffer, Some("recursion"));
+            let img = egui_extras::image::RetainedImage::from_color_image("text", framebuffer);
             img.show(ui);
 
             // handle user inputs

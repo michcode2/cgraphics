@@ -1,22 +1,25 @@
+use std::sync::Arc;
+
 use eframe::egui::Rgba;
 use nalgebra;
 
 use crate::{
     intersect::{Intersect, Intersection},
     renderer::Ray,
+    surfaces::{specular::Specular, Surface},
 };
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Sphere {
     pub origin: nalgebra::Vector3<f32>,
     pub radius: f32,
-    pub colour: Rgba,
+    surface: Arc<dyn Surface>,
 }
 
 #[allow(non_snake_case)]
 impl Intersect for Sphere {
     // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-Sphere-intersection.html
-    fn test_intersection(&self, ray: &Ray) -> Intersection {
+    fn test_intersection(&self, ray: &Ray, colour: Rgba) -> Intersection {
         let L = self.origin - ray.origin;
         let t_ca = L.dot(&ray.direction);
 
@@ -41,12 +44,37 @@ impl Intersect for Sphere {
 
         // return the colour of the sphere if the ray intersects, else the background colour
         if distance < self.radius {
+            // println!(
+            //     "normal: {}, origin: {}, surface: {}",
+            //     normal_vec, self.origin, surface
+            // );
             return Intersection::new(
-                self.colour,
+                self.surface.get_value(colour),
                 Some((surface - ray.origin).norm()),
                 Some(normal_ray),
             );
         }
         return Intersection::new(Rgba::from_gray(background), None, None);
+    }
+}
+
+impl Sphere {
+    pub fn blank_specular_surface(origin: nalgebra::Vector3<f32>, radius: f32) -> Sphere {
+        Sphere {
+            origin,
+            radius,
+            surface: Arc::new(Specular::new()),
+        }
+    }
+    pub fn with_shader(
+        origin: nalgebra::Vector3<f32>,
+        radius: f32,
+        surface: Arc<dyn Surface>,
+    ) -> Sphere {
+        Sphere {
+            origin,
+            radius,
+            surface,
+        }
     }
 }

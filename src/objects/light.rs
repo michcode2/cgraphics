@@ -20,7 +20,7 @@ impl PointLight {
 #[allow(non_snake_case)]
 impl Intersect for PointLight {
     // pretty much the same as the sphere intersector, minor changes
-    fn test_intersection(&self, ray: &renderer::Ray) -> crate::intersect::Intersection {
+    fn test_intersection(&self, ray: &renderer::Ray, _: Rgba) -> crate::intersect::Intersection {
         let L = self.origin - ray.origin;
         let t_ca = L.dot(&ray.direction);
 
@@ -35,8 +35,12 @@ impl Intersect for PointLight {
         let distance = (close_approach_point - self.origin).norm();
 
         // use a 1/r^2 dropoff
-        let brightness = t_ca * self.intensity / distance.powi(2);
+        // let brightness = t_ca * self.intensity / distance.powi(2);
 
-        return Intersection::new(Rgba::from_gray(brightness), Some(f32::MAX), None);
+        if distance < self.intensity {
+            return Intersection::new(Rgba::from_gray(1.0), Some(t_ca), None);
+        } else {
+            return Intersection::new(Rgba::from_black_alpha(0.0), None, None);
+        }
     }
 }

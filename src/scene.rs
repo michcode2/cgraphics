@@ -5,11 +5,9 @@ use nalgebra::Vector3;
 
 use crate::{
     intersect::{Intersect, Intersection},
-    objects::light::{self, PointLight},
-    objects::plane,
-    objects::sphere::Sphere,
-    objects::triangle::{self, Triangle},
+    objects::*,
     renderer::Ray,
+    surfaces::diffuse,
 };
 
 #[derive(Clone)]
@@ -22,6 +20,7 @@ pub struct Scene {
 const DEPTH: u8 = 4;
 
 impl Scene {
+    #[allow(dead_code)]
     pub fn test_intersections(&self, ray: Ray, current_depth: u8) -> Intersection {
         // go over each object in the scene
         //println!("{}", current_depth);
@@ -29,27 +28,36 @@ impl Scene {
             .objects
             .iter()
             // go over each object in the scene and find the intersections
-            .map(|obj| obj.test_intersection(&ray))
+            .map(|obj| obj.test_intersection(&ray, Rgba::from_gray(1.0)))
             .min()
             .unwrap();
 
         let mut intersect = all_objects; // if the normal is a value, it implies that something has been hit
         if let Some(ray_new) = intersect.normal {
             // do another bounce if theres still bounces avaliable
+            //let unit_incoming = ray.direction / ray.direction.norm();
+            //let unit_normal = ray_new.direction / ray_new.direction.norm();
+            //let normal_scaled = ray_new.direction.scale(unit_incoming.dot(&unit_normal));
+            let reflected_direction: Vector3<f32> = ray.direction + ray_new.direction.scale(2.0);
+            /*+ (ray
+                    .direction
+                    .apply_norm(&EuclideanNorm)
+                    .dot(ray_new.direction.apply_norm(&EuclideanNorm))))
+            .norm();*/
+            let reflected_ray = Ray::new_preserve(ray_new.origin, reflected_direction);
             if current_depth < self.max_depth {
-                let result = self.test_intersections(ray_new, current_depth + 1);
+                let result = self.test_intersections(reflected_ray, current_depth + 1);
                 // adjust the colour a little bit
-                intersect.colour = result.colour + intersect.colour.multiply(0.2);
+                intersect.colour = result.colour;
             }
         };
         // order all the objects by how far they are and return the closest one
 
-        let mut return_value = intersect;
+        let return_value = intersect;
 
         if let Some(_) = return_value.normal {
             return return_value;
         } else {
-            return_value.colour = return_value.colour + Rgba::from_gray(-0.01);
             return return_value;
         }
     }
@@ -58,13 +66,10 @@ impl Scene {
     pub fn test_intersections_vec(&self, ray: Ray) -> Intersection {
         // this is being kept around because if i get smart, maybe it will come in handy to give me more control
         let mut to_process = vec![(ray, 0)];
-        let mut colours = vec![];
+        let mut colours = vec![Rgba::BLACK];
 
-        let mut final_intersection = Intersection {
-            colour: Rgba::BLACK,
-            distance: None,
-            normal: None,
-        };
+        let mut all_intersections = vec![];
+
         while let Some((this_ray, depth)) = to_process.pop() {
             if depth > self.max_depth {
                 break;
@@ -72,29 +77,41 @@ impl Scene {
             let mut intersections = self
                 .objects
                 .iter()
-                .map(|obj| obj.test_intersection(&this_ray))
+                .map(|obj| obj.test_intersection(&this_ray, Rgba::from_gray(0.0)))
                 .collect::<Vec<Intersection>>();
             intersections.sort();
 
-            if depth == 0 {
-                final_intersection = intersections[0];
-            } else {
-                colours.push(intersections[0].colour)
+            let a = intersections
+                .iter()
+                .filter(|i| i.distance.is_some())
+                .collect::<Vec<&Intersection>>();
+            if a.len() > 1 {
+                println!("{:?}", intersections);
             }
-            if let Some(reflection) = intersections[0].normal {
-                to_process.push((reflection, depth + 1));
+
+            all_intersections.push(intersections[0]);
+
+            if let Some(normal) = intersections[0].normal {
+                let reflected_direction: Vector3<f32> = ray.direction + normal.direction.scale(2.0);
+                let reflected_ray = Ray::new_preserve(normal.origin, reflected_direction);
+                to_process.push((reflected_ray, depth + 1));
             } else {
                 break;
             }
         }
 
         colours.reverse();
+        //final_intersection.colour = colours[0];
 
-        colours
-            .iter()
-            .for_each(|&c| final_intersection.colour = final_intersection.colour + c.multiply(1.0));
+        if colours.len() > 1 {
+            println!("{:?}", colours);
+        }
 
-        return final_intersection;
+        //colours
+        //    .iter()
+        //    .for_each(|&c| final_intersection.colour = final_intersection.colour + c.multiply(1.0));
+
+        return all_intersections[all_intersections.len() - 1];
     }
 
     #[allow(dead_code)]
@@ -106,11 +123,10 @@ impl Scene {
 
         for i in 0..num_balls {
             let y = -extent + (i as f32 * extent * 2.0 / num_balls as f32);
-            objects.push(Arc::new(Sphere {
-                origin: nalgebra::Vector3::new(3.0, y, 2.0 * (y).sin() + 0.1 * y.powi(2)),
-                radius: 0.1,
-                colour: Rgba::from_white_alpha(1.0),
-            }));
+            objects.push(Arc::new(sphere::Sphere::blank_specular_surface(
+                nalgebra::Vector3::new(3.0, y, 2.0 * (y).sin() + 0.1 * y.powi(2)),
+                0.1,
+            )));
         }
 
         objects.push(Arc::new(light::PointLight::new(
@@ -144,42 +160,28 @@ impl Scene {
         let triangle = triangle::Triangle::from_3_points(&e, &d, &f, Rgba::from_rgb(0.0, 1.0, 0.0));
 
         let objects: Vec<Arc<dyn Intersect>> = vec![
-            Arc::new(Sphere {
-                origin: nalgebra::Vector3::new(3.0, 8.0, 8.0),
-                radius: 1.0,
-                colour: Rgba::from_white_alpha(1.0),
-            }),
-            Arc::new(Sphere {
-                origin: nalgebra::Vector3::new(3.0, 5.0, 5.0),
-                radius: 1.0,
-                colour: Rgba::from_white_alpha(1.0),
-            }),
-            Arc::new(Sphere {
-                origin: nalgebra::Vector3::new(0.0, 3.6, 3.9),
-                radius: 0.5,
-                colour: Rgba::from_rgb(1.0, 0.0, 0.0),
-            }),
-            Arc::new(PointLight::new(
+            Arc::new(sphere::Sphere::blank_specular_surface(
+                nalgebra::Vector3::new(3.0, 8.0, 8.0),
+                1.0,
+            )),
+            Arc::new(sphere::Sphere::blank_specular_surface(
+                nalgebra::Vector3::new(3.0, 5.0, 5.0),
+                1.0,
+            )),
+            Arc::new(sphere::Sphere::blank_specular_surface(
+                nalgebra::Vector3::new(0.0, 3.6, 3.9),
+                1.0,
+            )),
+            Arc::new(light::PointLight::new(
                 nalgebra::Vector3::new(12.0, 0.0, 10.0),
                 1.0,
             )),
             Arc::new(plane),
             Arc::new(triangle),
-            Arc::new(Sphere {
-                origin: d,
-                radius: 0.1,
-                colour: Rgba::from_rgb(1.0, 0.0, 0.0),
-            }),
-            Arc::new(Sphere {
-                origin: e,
-                radius: 0.1,
-                colour: Rgba::from_rgb(1.0, 0.0, 0.0),
-            }),
-            Arc::new(Sphere {
-                origin: f,
-                radius: 0.1,
-                colour: Rgba::from_rgb(1.0, 0.0, 0.0),
-            }),
+            Arc::new(sphere::Sphere::blank_specular_surface(d, 0.1)),
+            Arc::new(sphere::Sphere::blank_specular_surface(e, 0.1)),
+            Arc::new(sphere::Sphere::blank_specular_surface(f, 0.1)),
+            Arc::new(world_light::WorldLight {}),
         ];
         Scene {
             objects,
@@ -190,12 +192,16 @@ impl Scene {
     #[allow(dead_code)]
     pub fn eclipse() -> Scene {
         let objects: Vec<Arc<dyn Intersect>> = vec![
-            Arc::new(Sphere {
-                origin: nalgebra::Vector3::new(3.0, 0.0, 0.0),
-                radius: 1.0,
-                colour: Rgba::from_white_alpha(1.0),
-            }),
-            Arc::new(PointLight::new(nalgebra::Vector3::new(9.0, 0.0, 0.0), 1.0)),
+            Arc::new(sphere::Sphere::with_shader(
+                nalgebra::Vector3::new(1.0, 0.0, 0.0),
+                0.8,
+                Arc::new(diffuse::Diffuse {}),
+            )),
+            Arc::new(light::PointLight::new(
+                nalgebra::Vector3::new(3.0, 0.0, 0.0),
+                1.0,
+            )),
+            Arc::new(world_light::WorldLight {}),
         ];
         Scene {
             objects,
@@ -214,11 +220,10 @@ impl Scene {
                 .map(|val: &str| val.parse::<f32>().unwrap())
                 .collect::<Vec<f32>>();
 
-            let object = Sphere {
-                origin: Vector3::new(numbers[0], numbers[1], numbers[2]),
-                radius: numbers[3],
-                colour: Rgba::from_rgb(numbers[4], numbers[5], numbers[6]),
-            };
+            let object = sphere::Sphere::blank_specular_surface(
+                Vector3::new(numbers[0], numbers[1], numbers[2]),
+                numbers[3],
+            );
             return Arc::new(object);
         };
 
@@ -230,7 +235,7 @@ impl Scene {
                 .collect::<Vec<f32>>();
 
             let origin = Vector3::new(numbers[0], numbers[1], numbers[2]);
-            let object = PointLight::new(origin, numbers[3]);
+            let object = light::PointLight::new(origin, numbers[3]);
             return Arc::new(object);
         };
 
@@ -245,7 +250,7 @@ impl Scene {
             let b = Vector3::new(numbers[3], numbers[4], numbers[5]);
             let c = Vector3::new(numbers[6], numbers[7], numbers[8]);
             let colour = Rgba::from_rgb(numbers[9], numbers[10], numbers[11]);
-            let tri = Triangle::from_3_points(&a, &b, &c, colour);
+            let tri = triangle::Triangle::from_3_points(&a, &b, &c, colour);
             return Arc::new(tri);
         };
 

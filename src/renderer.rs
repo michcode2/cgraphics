@@ -9,61 +9,47 @@ use crate::objects::sphere::Sphere;
 #[allow(dead_code)]
 // the little smiley face
 pub fn many_spheres(x: f32, y: f32) -> Rgba {
-    let first_sphere = Sphere {
-        origin: nalgebra::Vector3::new(3.0, 1.5, 3.0),
-        radius: 0.75,
-        colour: Rgba::from_white_alpha(1.0),
-    };
+    let first_sphere = Sphere::blank_specular_surface(nalgebra::Vector3::new(3.0, 1.5, 3.0), 0.75);
 
-    let second_sphere = Sphere {
-        origin: nalgebra::Vector3::new(3.0, -1.5, 3.0),
-        radius: 0.75,
-        colour: Rgba::from_white_alpha(1.0),
-    };
+    let second_sphere =
+        Sphere::blank_specular_surface(nalgebra::Vector3::new(3.0, -1.5, 3.0), 0.75);
 
     let mut objects = vec![first_sphere, second_sphere];
 
-    objects.push(Sphere {
-        origin: nalgebra::Vector3::new(3.0, -3.0, 0.0),
-        radius: 0.5,
-        colour: Rgba::from_white_alpha(1.0),
-    });
+    objects.push(Sphere::blank_specular_surface(
+        nalgebra::Vector3::new(3.0, -3.0, 0.0),
+        0.5,
+    ));
 
-    objects.push(Sphere {
-        origin: nalgebra::Vector3::new(3.0, 3.0, 0.0),
-        radius: 0.5,
-        colour: Rgba::from_white_alpha(1.0),
-    });
+    objects.push(Sphere::blank_specular_surface(
+        nalgebra::Vector3::new(3.0, 3.0, 0.0),
+        0.5,
+    ));
 
-    objects.push(Sphere {
-        origin: nalgebra::Vector3::new(3.0, 2.0, -1.0),
-        radius: 0.5,
-        colour: Rgba::from_white_alpha(1.0),
-    });
+    objects.push(Sphere::blank_specular_surface(
+        nalgebra::Vector3::new(3.0, 2.0, -1.0),
+        0.5,
+    ));
 
-    objects.push(Sphere {
-        origin: nalgebra::Vector3::new(3.0, -2.0, -1.0),
-        radius: 0.5,
-        colour: Rgba::from_white_alpha(1.0),
-    });
+    objects.push(Sphere::blank_specular_surface(
+        nalgebra::Vector3::new(3.0, -2.0, -1.0),
+        0.5,
+    ));
 
-    objects.push(Sphere {
-        origin: nalgebra::Vector3::new(3.0, -1.0, -1.0),
-        radius: 0.5,
-        colour: Rgba::from_white_alpha(1.0),
-    });
+    objects.push(Sphere::blank_specular_surface(
+        nalgebra::Vector3::new(3.0, -1.0, -1.0),
+        0.5,
+    ));
 
-    objects.push(Sphere {
-        origin: nalgebra::Vector3::new(3.0, 1.0, -1.0),
-        radius: 0.5,
-        colour: Rgba::from_white_alpha(1.0),
-    });
+    objects.push(Sphere::blank_specular_surface(
+        nalgebra::Vector3::new(3.0, 1.0, -1.0),
+        0.5,
+    ));
 
-    objects.push(Sphere {
-        origin: nalgebra::Vector3::new(3.0, 0.0, -1.0),
-        radius: 0.5,
-        colour: Rgba::from_white_alpha(1.0),
-    });
+    objects.push(Sphere::blank_specular_surface(
+        nalgebra::Vector3::new(3.0, 0.0, -1.0),
+        0.5,
+    ));
 
     let direction = nalgebra::Vector3::new(0.5, y, x + 0.1);
     let origin = nalgebra::Vector3::new(0.0, 0.0, 0.0);
@@ -71,7 +57,7 @@ pub fn many_spheres(x: f32, y: f32) -> Rgba {
 
     let mut unsorted = objects
         .into_iter()
-        .map(|obj| obj.test_intersection(&pixel_ray))
+        .map(|obj| obj.test_intersection(&pixel_ray, Rgba::from_gray(1.0)))
         .collect::<Vec<Intersection>>();
     unsorted.sort_by(|a, b| {
         if let Some(r_a) = a.distance {

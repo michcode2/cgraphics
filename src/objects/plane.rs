@@ -48,7 +48,7 @@ impl Plane {
 
 impl Intersect for Plane {
     #[allow(non_snake_case)]
-    fn test_intersection(&self, ray: &crate::renderer::Ray) -> intersect::Intersection {
+    fn test_intersection(&self, ray: &crate::renderer::Ray, _: Rgba) -> intersect::Intersection {
         // stolen from https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-plane-and-ray-disk-intersection.html
 
         let t_int = (self.origin - ray.origin).dot(&self.normal) / ray.direction.dot(&self.normal);
@@ -57,12 +57,12 @@ impl Intersect for Plane {
         }
         // need epsilon otherwise it gets specely
         let eps = 1e-3;
-        //let normal_ray = Ray::new(ray.at_point(t_int + eps), self.normal);
+        let normal_ray = Ray::new(ray.at_point(t_int + eps), self.normal);
 
-        let delta = ray.direction + self.normal;
+        //let delta = ray.direction + self.normal;
 
-        let reflected_ray = Ray::new(ray.at_point(t_int + eps), (delta) - ray.direction);
+        //let reflected_ray = Ray::new(ray.at_point(t_int + eps), (delta) - ray.direction);
 
-        return Intersection::new(Rgba::from_gray(0.5), Some(t_int), Some(reflected_ray));
+        return Intersection::new(Rgba::from_gray(0.5), Some(t_int), Some(normal_ray));
     }
 }

@@ -1,4 +1,5 @@
 use eframe::egui::Rgba;
+use image::RgbImage;
 use nalgebra::Vector3;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
@@ -18,7 +19,7 @@ impl Camera {
         let array_of_arrays = (0..self.width)
             .into_par_iter()
             .map(|x| {
-                let scene_temp_temp = scene_temp.clone();
+                //let scene_temp_temp = scene_temp.clone();
                 (0..self.height)
                     .into_par_iter()
                     .map(|y| {
@@ -39,14 +40,52 @@ impl Camera {
 
                         //println!("{}, {}", x, y);
                         // do the calculations and put it in the buffer
-                        //let color = scene.test_intersections(pixel_ray, 0).colour;
-                        let color = scene_temp_temp.test_intersections(pixel_ray, 0).colour;
+                        let color = scene.test_intersections(pixel_ray, 0).colour;
+                        //let color = scene_temp_temp.test_intersections_vec(pixel_ray).colour;
                         return color;
                     })
                     .collect::<Vec<Rgba>>()
             })
             .collect();
         array_of_arrays
+    }
+
+    #[allow(dead_code)]
+    pub fn save_to_file(framebuffer: &Vec<Vec<Rgba>>, name: Option<&str>) {
+        let rgba_to_bytes = |pixel: Rgba| {
+            println!("{}, {}, {}", pixel.r(), pixel.g(), pixel.b());
+            let ret = vec![
+                (pixel.r() * 255.0) as u8,
+                (pixel.g() * 255.0) as u8,
+                (pixel.b() * 255.0) as u8,
+            ];
+            println!("{:?}", ret);
+            return ret;
+        };
+        let image = RgbImage::from_vec(
+            framebuffer.len() as u32,
+            framebuffer[0].len() as u32,
+            framebuffer
+                .clone()
+                .into_iter()
+                .flatten()
+                .map(|pixel: Rgba| rgba_to_bytes(pixel))
+                .flatten()
+                .collect(),
+        )
+        .unwrap();
+        let time = chrono::Local::now();
+        let filename = if let Some(descriptor) = name {
+            format!("{} {}", time.to_rfc3339(), descriptor)
+        } else {
+            time.to_rfc3339()
+        };
+        image
+            .save_with_format(
+                format!("./images/{}.png", filename),
+                image::ImageFormat::Png,
+            )
+            .unwrap();
     }
 
     pub fn rotate_horizontal(&mut self, dtheta: f32) {

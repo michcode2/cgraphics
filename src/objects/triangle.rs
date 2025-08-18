@@ -28,8 +28,8 @@ impl Triangle {
 }
 
 impl Intersect for Triangle {
-    fn test_intersection(&self, ray: &crate::renderer::Ray) -> Intersection {
-        let mut potential = self.inner_plane.test_intersection(ray);
+    fn test_intersection(&self, ray: &crate::renderer::Ray, colour: Rgba) -> Intersection {
+        let mut potential = self.inner_plane.test_intersection(ray, colour);
         if let Some(t) = potential.distance {
             let point = ray.at_point(t);
             let plane_coords = self.inner_plane.in_plane_coords(&point);

@@ -5,7 +5,7 @@ use eframe::egui::Rgba;
 use crate::renderer::Ray;
 
 pub trait Intersect: Send + Sync {
-    fn test_intersection(&self, ray: &Ray) -> Intersection;
+    fn test_intersection(&self, ray: &Ray, incoming_colour: Rgba) -> Intersection;
 }
 
 #[derive(Clone, Copy, Debug)]
