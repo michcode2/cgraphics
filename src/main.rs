@@ -4,6 +4,7 @@ use nalgebra::Vector3;
 use renderer::Ray;
 use scene::Scene;
 mod camera;
+mod common_maths;
 mod intersect;
 mod objects;
 mod renderer;

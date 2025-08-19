@@ -4,7 +4,7 @@ use eframe::egui::Rgba;
 
 use crate::{renderer::Ray, surfaces::Surface};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TestIntersectionResult(pub Intersection, pub Option<Arc<dyn Surface>>);
 impl PartialOrd for TestIntersectionResult {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {

@@ -36,21 +36,24 @@ impl Scene {
 
         let mut intersect = all_objects.clone().into_iter().min().unwrap(); // if the normal is a value, it implies that something has been hit
 
-        if let Some(ray_new) = intersect.0.normal {
+        if let Some(normal_ray) = intersect.0.normal {
+            //aiming to improve this so that the surfaces can give rays to render and recieve the information
+
             // do another bounce if theres still bounces avaliable
-            let reflected_direction: Vector3<f32> = ray.direction + ray_new.direction.scale(2.0);
-            let reflected_ray = Ray::new_preserve(ray_new.origin, reflected_direction);
-            if current_depth < self.max_depth {
-                let result = self.test_intersections(reflected_ray, current_depth + 1);
-                // adjust the colour a littl
-                intersect.0.colour = intersect
-                    .clone()
-                    .1
-                    .unwrap_or(Arc::new(Diffuse {
-                        colour: Rgba::GREEN,
-                    }))
-                    .get_value(result.0.colour);
-            }
+            let new_rays = intersect
+                .clone()
+                .1
+                .unwrap()
+                .request_rays(&normal_ray, &ray)
+                .into_iter()
+                .map(|r| self.test_intersections(r, current_depth + 1))
+                .collect::<Vec<TestIntersectionResult>>();
+
+            intersect.0.colour = intersect
+                .1
+                .clone()
+                .unwrap()
+                .intersections_to_colour(new_rays);
         };
         // order all the objects by how far they are and return the closest one
 
@@ -163,9 +166,12 @@ impl Scene {
                 nalgebra::Vector3::new(3.0, 5.0, 5.0),
                 1.0,
             )),
-            Arc::new(sphere::Sphere::blank_specular_surface(
+            Arc::new(sphere::Sphere::with_shader(
                 nalgebra::Vector3::new(0.0, 3.6, 3.9),
                 1.0,
+                Arc::new(Diffuse {
+                    colour: Rgba::GREEN,
+                }),
             )),
             Arc::new(light::PointLight::new(
                 nalgebra::Vector3::new(12.0, 0.0, 10.0),

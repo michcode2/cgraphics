@@ -1,22 +1,54 @@
 use epaint::Rgba;
 
-use crate::surfaces::Surface;
+use crate::{common_maths::maths, renderer::Ray, surfaces::Surface};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Specular {
-    self_colour: Rgba,
+    colour: Rgba,
 }
 
 impl Surface for Specular {
     fn get_value(&self, other: Rgba) -> epaint::Rgba {
-        return self.self_colour + other;
+        return self.colour + other;
+    }
+
+    fn request_rays(&self, normal_ray: &Ray, incoming_ray: &Ray) -> Vec<Ray> {
+        let v = vec![maths::reflected_ray(normal_ray, incoming_ray)];
+        //println!("{:?}", v);
+        v
+    }
+
+    fn intersections_to_colour(&self, rays: Vec<crate::intersect::TestIntersectionResult>) -> Rgba {
+        //println!("{:?}", rays);
+        rays[0].0.colour
+        //self.colour
     }
 }
 
 impl Specular {
     pub fn new() -> Specular {
         Specular {
-            self_colour: Rgba::from_gray(1.0),
+            colour: Rgba::from_gray(1.0),
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::intersect::{Intersection, TestIntersectionResult};
+
+    use super::*;
+
+    #[test]
+    fn should_be_true() {
+        let thingy = Specular {
+            colour: Rgba::BLACK,
+        };
+        let inputs = vec![TestIntersectionResult(
+            Intersection::new(Rgba::BLUE, None, None),
+            None,
+        )];
+        let colour = thingy.intersections_to_colour(inputs);
+        assert_eq!(colour, Rgba::BLUE)
     }
 }
