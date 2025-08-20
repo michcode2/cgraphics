@@ -29,8 +29,12 @@ impl Camera {
                             ((2.0 * y as f32) / (self.height / scaling) as f32) - 1.0;
 
                         let pixel_direction = nalgebra::Vector3::new(
-                            -y_normalised * self.get_direction_horizontal().sin(), // who up rotating
-                            y_normalised * self.get_direction_horizontal().cos(),  // their matrix
+                            -y_normalised
+                                * self.get_direction_horizontal().sin()
+                                * self.get_direction_vertical().sin(), // who up rotating
+                            y_normalised
+                                * self.get_direction_horizontal().cos()
+                                * self.get_direction_vertical().sin(), // their matrix
                             x_normalised * self.get_direction_vertical().sin(), // this will need to get an update when the camera can change pitch and it is not defined as the z coordinate
                         );
 
@@ -87,19 +91,6 @@ impl Camera {
                 image::ImageFormat::Png,
             )
             .unwrap();
-    }
-
-    pub fn rotate_horizontal(&mut self, dtheta: f32) {
-        // get how much of the vector is in the horizontal plan e
-        let r = self.location.direction.norm();
-
-        let theta_1 = self.get_direction_horizontal() - dtheta;
-
-        let x_1 = theta_1.cos() * r;
-        let y_1 = theta_1.sin() * r;
-
-        self.location.direction.x = x_1;
-        self.location.direction.y = y_1;
     }
 
     pub fn rotate(&mut self, dtheta: f32, dphi: f32) {
