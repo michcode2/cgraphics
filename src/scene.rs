@@ -37,23 +37,25 @@ impl Scene {
         let mut intersect = all_objects.clone().into_iter().min().unwrap(); // if the normal is a value, it implies that something has been hit
 
         if let Some(normal_ray) = intersect.0.normal {
-            //aiming to improve this so that the surfaces can give rays to render and recieve the information
+            if current_depth < self.max_depth {
+                //aiming to improve this so that the surfaces can give rays to render and recieve the information
 
-            // do another bounce if theres still bounces avaliable
-            let new_rays = intersect
-                .clone()
-                .1
-                .unwrap()
-                .request_rays(&normal_ray, &ray)
-                .into_iter()
-                .map(|r| self.test_intersections(r, current_depth + 1))
-                .collect::<Vec<TestIntersectionResult>>();
+                // do another bounce if theres still bounces avaliable
+                let new_rays = intersect
+                    .clone()
+                    .1
+                    .unwrap()
+                    .request_rays(&normal_ray, &ray)
+                    .into_iter()
+                    .map(|r| self.test_intersections(r, current_depth + 1))
+                    .collect::<Vec<TestIntersectionResult>>();
 
-            intersect.0.colour = intersect
-                .1
-                .clone()
-                .unwrap()
-                .intersections_to_colour(new_rays);
+                intersect.0.colour = intersect
+                    .1
+                    .clone()
+                    .unwrap()
+                    .intersections_to_colour(new_rays);
+            }
         };
         // order all the objects by how far they are and return the closest one
 
@@ -157,6 +159,12 @@ impl Scene {
 
         let triangle = triangle::Triangle::from_3_points(&e, &d, &f, Rgba::from_rgb(0.0, 1.0, 0.0));
 
+        let h = Vector3::new(5.0, -4.0, 1.0);
+        let i = Vector3::new(5.0, -2.0, 1.0);
+        let j = Vector3::new(5.0, -4.0, 9.0);
+
+        let quad = quad::Quad::from_3_points(&h, &i, &j);
+
         let objects: Vec<Arc<dyn Intersect>> = vec![
             Arc::new(sphere::Sphere::blank_specular_surface(
                 nalgebra::Vector3::new(3.0, 8.0, 8.0),
@@ -183,6 +191,7 @@ impl Scene {
             Arc::new(sphere::Sphere::blank_specular_surface(e, 0.1)),
             Arc::new(sphere::Sphere::blank_specular_surface(f, 0.1)),
             Arc::new(world_light::WorldLight {}),
+            Arc::new(quad),
         ];
         Scene {
             objects,

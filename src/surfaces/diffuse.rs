@@ -1,3 +1,5 @@
+use std::f32;
+
 use epaint::Rgba;
 use nalgebra::Vector3;
 use rand::random_range;
@@ -16,7 +18,7 @@ impl Surface for Diffuse {
 
     fn request_rays(&self, normal_ray: &Ray, incoming_ray: &Ray) -> Vec<Ray> {
         let reflected = maths::reflected_ray(normal_ray, incoming_ray);
-        (0..5)
+        (0..50)
             .into_iter()
             .map(|_| {
                 Ray::new(
@@ -41,9 +43,10 @@ impl Surface for Diffuse {
 impl Diffuse {
     fn rotate_vector(input: &Vector3<f32>) -> Vector3<f32> {
         let length = input.norm();
-        let scale_x: f32 = random_range(0.0..1.0_f32).cos();
-        let scale_y: f32 = random_range(0.0..1.0_f32).cos();
-        let scale_z: f32 = random_range(0.0..1.0_f32).cos();
+        let kernel = |x: f32| (1.0 + (f32::consts::PI * x).cos()) / 2.0;
+        let scale_x: f32 = kernel(random_range(0.0..1.0_f32));
+        let scale_y: f32 = kernel(random_range(0.0..1.0_f32));
+        let scale_z: f32 = kernel(random_range(0.0..1.0_f32));
         let mut return_val = Vector3::new(input.x * scale_x, input.y * scale_y, input.z * scale_z);
         return_val.scale_mut(return_val.norm() / length);
         return_val

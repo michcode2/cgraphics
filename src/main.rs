@@ -16,6 +16,10 @@ fn main() -> eframe::Result {
         viewport: egui::ViewportBuilder::default().with_inner_size([420.0, 420.0]),
         ..Default::default()
     };
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(8)
+        .build_global()
+        .unwrap();
     eframe::run_native(
         "renderer",
         options,
@@ -30,6 +34,7 @@ struct RenderApp {
     buffer: Vec<Vec<Rgba>>,
     camera: Camera,
     scene: Scene,
+    static_frames: u32,
 }
 
 impl Default for RenderApp {
@@ -60,8 +65,9 @@ impl Default for RenderApp {
         RenderApp {
             buffer,
             camera,
-            //scene: Scene::from_csv(String::from("blender/monky.csv")),
+            //scene: Scene::from_csv(String::from("blender/test.csv")),
             scene: Scene::pondering_orbs(),
+            static_frames: 5,
         }
     }
 }
@@ -75,25 +81,32 @@ impl eframe::App for RenderApp {
 
             let framebuffer = self.buffer_to_image();
             //camera::Camera::save_to_file(&self.buffer, Some("recursion"));
-            let img = egui_extras::image::RetainedImage::from_color_image("text", framebuffer);
-            img.show(ui);
+            egui_extras::image::RetainedImage::from_color_image("text", framebuffer)
+                .show_scaled(ui, self.static_frames as f32);
 
             // handle user inputs
             ctx.input(|inputs| {
                 for pressed in &inputs.keys_down {
+                    self.static_frames = 10;
                     match pressed {
                         Key::W => self.camera.move_by(Vector3::new(0.1, 0.0, 0.0)),
                         Key::S => self.camera.move_by(Vector3::new(-0.1, 0.0, 0.0)),
                         Key::A => self.camera.move_by(Vector3::new(0.0, -0.1, 0.0)),
                         Key::D => self.camera.move_by(Vector3::new(0.0, 0.1, 0.0)),
-                        Key::Z => self.camera.move_by(Vector3::new(0.0, 0.0, 0.1)),
-                        Key::X => self.camera.move_by(Vector3::new(0.0, 0.0, -0.1)),
-                        Key::ArrowLeft => self.camera.rotate_horizontal(0.05),
-                        Key::ArrowRight => self.camera.rotate_horizontal(-0.05),
+                        Key::Z => self.camera.move_by(Vector3::new(0.0, 0.0, -0.1)),
+                        Key::X => self.camera.move_by(Vector3::new(0.0, 0.0, 0.1)),
+                        Key::ArrowLeft => self.camera.rotate(0.05, 0.0),
+                        Key::ArrowRight => self.camera.rotate(-0.05, 0.0),
+                        Key::ArrowUp => self.camera.rotate(0.0, 0.05),
+                        Key::ArrowDown => self.camera.rotate(0.0, -0.05),
                         _ => (),
                     }
                 }
             });
+            println!("{}", self.static_frames);
+            if self.static_frames > 1 {
+                self.static_frames -= 1;
+            }
         });
     }
 }
@@ -119,6 +132,6 @@ impl RenderApp {
     // tells the camera to do the rendering, parallel is slower than sequential for now
     fn update_buffer_sharedstate(&mut self) {
         //self.buffer = self.camera.create_buffer_parallel(self.scene.clone());
-        self.buffer = self.camera.create_buffer(&self.scene);
+        self.buffer = self.camera.create_buffer(&self.scene, self.static_frames);
     }
 }

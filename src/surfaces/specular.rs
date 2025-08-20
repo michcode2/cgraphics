@@ -20,7 +20,7 @@ impl Surface for Specular {
 
     fn intersections_to_colour(&self, rays: Vec<crate::intersect::TestIntersectionResult>) -> Rgba {
         //println!("{:?}", rays);
-        rays[0].0.colour
+        rays[0].0.colour.multiply(0.5) + self.colour.multiply(0.5)
         //self.colour
     }
 }
@@ -28,7 +28,7 @@ impl Surface for Specular {
 impl Specular {
     pub fn new() -> Specular {
         Specular {
-            colour: Rgba::from_gray(1.0),
+            colour: Rgba::from_gray(0.1),
         }
     }
 }

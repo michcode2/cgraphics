@@ -13,23 +13,25 @@ pub struct Camera {
 
 impl Camera {
     // calls the render function on the provided scene for eah pixel and put it where it should be
-    pub fn create_buffer(&self, scene: &Scene) -> Vec<Vec<Rgba>> {
+    pub fn create_buffer(&self, scene: &Scene, scaling: u32) -> Vec<Vec<Rgba>> {
         // init the buffer to pure black
-        let array_of_arrays = (0..self.width)
+        let array_of_arrays = (0..self.width / scaling)
             .into_par_iter()
             .map(|x| {
                 //let scene_temp_temp = scene_temp.clone();
-                (0..self.height)
+                (0..self.height / scaling)
                     .into_par_iter()
                     .map(|y| {
                         // each dimension on screen should be a point from -1 to 1
-                        let x_normalised = ((-2.0 * x as f32) / self.width as f32) + 1.0;
-                        let y_normalised = ((2.0 * y as f32) / self.height as f32) - 1.0;
+                        let x_normalised =
+                            ((-2.0 * x as f32) / (self.width / scaling) as f32) + 1.0;
+                        let y_normalised =
+                            ((2.0 * y as f32) / (self.height / scaling) as f32) - 1.0;
 
                         let pixel_direction = nalgebra::Vector3::new(
                             -y_normalised * self.get_direction_horizontal().sin(), // who up rotating
                             y_normalised * self.get_direction_horizontal().cos(),  // their matrix
-                            x_normalised, // this will need to get an update when the camera can change pitch and it is not defined as the z coordinate
+                            x_normalised * self.get_direction_vertical().sin(), // this will need to get an update when the camera can change pitch and it is not defined as the z coordinate
                         );
 
                         let pixel_ray = Ray::new(
@@ -89,7 +91,7 @@ impl Camera {
 
     pub fn rotate_horizontal(&mut self, dtheta: f32) {
         // get how much of the vector is in the horizontal plan e
-        let r = (self.location.direction.x.powi(2) + self.location.direction.y.powi(2)).sqrt();
+        let r = self.location.direction.norm();
 
         let theta_1 = self.get_direction_horizontal() - dtheta;
 
@@ -100,12 +102,38 @@ impl Camera {
         self.location.direction.y = y_1;
     }
 
+    pub fn rotate(&mut self, dtheta: f32, dphi: f32) {
+        let r = self.location.direction.norm();
+
+        let phi_1 = self.get_direction_vertical() - dphi;
+        let theta_1 = self.get_direction_horizontal() - dtheta;
+
+        let z_1 = phi_1.cos() * r;
+        let x_1 = theta_1.cos() * r * phi_1.sin();
+        let y_1 = theta_1.sin() * r * phi_1.sin();
+
+        self.location.direction.x = x_1;
+        self.location.direction.y = y_1;
+        self.location.direction.z = z_1;
+        println!(
+            "{:?}, {}",
+            self.location.direction,
+            self.get_direction_vertical()
+        );
+    }
+
     fn get_direction_horizontal(&self) -> f32 {
         let x = self.location.direction.x;
         let y = self.location.direction.y;
 
         // trust me this is right
         y.atan2(x)
+    }
+
+    fn get_direction_vertical(&self) -> f32 {
+        let mag_horizontal =
+            (self.location.direction.x.powi(2) + self.location.direction.y.powi(2)).sqrt();
+        mag_horizontal.atan2(self.location.direction.z)
     }
 
     pub fn move_by(&mut self, direction: Vector3<f32>) {
