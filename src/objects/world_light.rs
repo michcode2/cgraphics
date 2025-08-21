@@ -5,6 +5,7 @@ use crate::{
     intersect::{Intersect, Intersection, TestIntersectionResult},
 };
 
+#[derive(Debug)]
 pub struct WorldLight {}
 
 impl Intersect for WorldLight {

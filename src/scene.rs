@@ -1,19 +1,21 @@
-use std::sync::Arc;
+use std::{fs, sync::Arc};
 
 use eframe::egui::Rgba;
 use nalgebra::Vector3;
+use serde_json::Value;
 
 use crate::{
     intersect::{Intersect, Intersection, TestIntersectionResult},
-    objects::*,
+    objects::{quad::Quad, sphere::Sphere, triangle::Triangle, *},
     renderer::Ray,
     surfaces::{
         diffuse::{self, Diffuse},
         specular::Specular,
+        Surface,
     },
 };
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Scene {
     objects: Vec<Arc<dyn Intersect>>,
     max_depth: u8,
@@ -179,6 +181,7 @@ impl Scene {
                 1.0,
                 Arc::new(Diffuse {
                     colour: Rgba::GREEN,
+                    samples: 30,
                 }),
             )),
             Arc::new(light::PointLight::new(
@@ -205,7 +208,10 @@ impl Scene {
             Arc::new(sphere::Sphere::with_shader(
                 nalgebra::Vector3::new(1.0, 0.0, 0.0),
                 0.8,
-                Arc::new(diffuse::Diffuse { colour: Rgba::BLUE }),
+                Arc::new(diffuse::Diffuse {
+                    colour: Rgba::BLUE,
+                    samples: 1,
+                }),
             )),
             Arc::new(light::PointLight::new(
                 nalgebra::Vector3::new(3.0, 0.0, 0.0),
@@ -278,5 +284,150 @@ impl Scene {
             objects,
             max_depth: DEPTH,
         }
+    }
+
+    pub fn from_json(file_name: &str) -> Scene {
+        let file_contents = String::from_utf8(fs::read(file_name).unwrap()).unwrap();
+        let contents_objects: Value = serde_json::from_str(&file_contents).unwrap();
+        let a = contents_objects["items"].as_array().unwrap();
+        let mut objects: Vec<Arc<dyn Intersect>> = vec![];
+        for item in a {
+            match item["kind"].as_str() {
+                Some("sphere") => {
+                    objects.push(Arc::new(Scene::parse_sphere(&item)));
+                }
+                Some("triangle") => {
+                    objects.push(Arc::new(Scene::parse_triangle(&item)));
+                }
+                Some("quad") => {
+                    objects.push(Arc::new(Scene::parse_quad(&item)));
+                }
+                None => {
+                    panic!("kind not specified")
+                }
+                Some(_) => {
+                    panic!("invalid kind of object")
+                }
+            }
+        }
+        Scene {
+            objects,
+            max_depth: 1,
+        }
+    }
+
+    fn parse_diffuse(data: &Value) -> Arc<dyn Surface> {
+        let colour = Rgba::from_rgb(
+            data["colour"][0].as_f64().unwrap() as f32,
+            data["colour"][1].as_f64().unwrap() as f32,
+            data["colour"][2].as_f64().unwrap() as f32,
+        );
+        Arc::new(Diffuse::new(
+            colour,
+            data["samples"].as_u64().unwrap() as usize,
+        ))
+    }
+
+    fn parse_specular(data: &Value) -> Arc<dyn Surface> {
+        let colour = Rgba::from_rgb(
+            data["colour"][0].as_f64().unwrap() as f32,
+            data["colour"][1].as_f64().unwrap() as f32,
+            data["colour"][2].as_f64().unwrap() as f32,
+        );
+        Arc::new(Specular::with_colour(colour))
+    }
+
+    fn parse_surface(data: &Value) -> Arc<dyn Surface> {
+        match data["type"].as_str() {
+            Some("specular") => Scene::parse_specular(&data),
+            Some("diffuse") => Scene::parse_diffuse(&data),
+            None => Arc::new(Specular::new()),
+            Some(_) => panic!("invalid surface type"),
+        }
+    }
+
+    fn parse_sphere(data: &Value) -> Sphere {
+        let origin = Scene::parse_vec3(&data["origin"]);
+        let radius = data["radius"].as_f64().unwrap() as f32;
+        let surface = Scene::parse_surface(&data["surface"]);
+        return Sphere::with_shader(origin, radius, surface);
+    }
+
+    fn parse_triangle(data: &Value) -> Triangle {
+        let a = Scene::parse_vec3(&data["a"]);
+        let b = Scene::parse_vec3(&data["b"]);
+        let c = Scene::parse_vec3(&data["c"]);
+        let surface = Scene::parse_surface(&data["surface"]);
+        return Triangle::from_3_points_and_surface(&a, &b, &c, surface);
+    }
+
+    fn parse_quad(data: &Value) -> Quad {
+        let a = Scene::parse_vec3(&data["a"]);
+        let b = Scene::parse_vec3(&data["b"]);
+        let c = Scene::parse_vec3(&data["c"]);
+        let surface = Scene::parse_surface(&data["surface"]);
+        return Quad::from_3_points_and_surface(&a, &b, &c, surface);
+    }
+
+    fn parse_vec3(data: &Value) -> Vector3<f32> {
+        Vector3::new(
+            data[0].as_f64().unwrap() as f32,
+            data[1].as_f64().unwrap() as f32,
+            data[2].as_f64().unwrap() as f32,
+        )
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use std::sync::Arc;
+
+    use epaint::Rgba;
+    use nalgebra::Vector3;
+
+    use crate::{
+        intersect::Intersect,
+        objects::{quad::Quad, sphere::Sphere, triangle},
+        scene::Scene,
+        surfaces::{diffuse::Diffuse, specular::Specular},
+    };
+
+    #[test]
+    fn test_serde() {
+        let mut objects: Vec<Arc<dyn Intersect>> = vec![Arc::new(Sphere::with_shader(
+            Vector3::new(0.0, 0.0, 0.0),
+            1.0,
+            Arc::new(Diffuse::new(Rgba::from_rgb(0.5, 0.7, 0.0), 10)),
+        ))];
+
+        let tri_a = Vector3::new(0.0, 0.0, 1.0);
+        let tri_b = Vector3::new(1.0, 0.0, 1.0);
+        let tri_c = Vector3::new(1.0, 1.0, 1.0);
+
+        objects.push(Arc::new(triangle::Triangle::from_3_points_and_surface(
+            &tri_a,
+            &tri_b,
+            &tri_c,
+            Arc::new(Specular::with_colour(Rgba::from_rgb(0.2, 0.2, 1.0))),
+        )));
+        let quad_a = Vector3::new(0.0, 0.0, 2.0);
+        let quad_b = Vector3::new(1.0, 0.0, 2.0);
+        let quad_c = Vector3::new(1.0, 1.0, 2.0);
+        objects.push(Arc::new(Quad::from_3_points_and_surface(
+            &quad_a,
+            &quad_b,
+            &quad_c,
+            Arc::new(Specular::new()),
+        )));
+
+        let expected = Scene {
+            objects,
+            max_depth: 1,
+        };
+
+        assert_eq!(
+            format!("{:?}", expected),
+            format!("{:?}", Scene::from_json("jsons/ci.json"))
+        );
     }
 }

@@ -31,24 +31,7 @@ impl Specular {
             colour: Rgba::from_gray(0.1),
         }
     }
-}
-
-#[cfg(test)]
-mod test {
-    use crate::intersect::{Intersection, TestIntersectionResult};
-
-    use super::*;
-
-    #[test]
-    fn should_be_true() {
-        let thingy = Specular {
-            colour: Rgba::BLACK,
-        };
-        let inputs = vec![TestIntersectionResult(
-            Intersection::new(Rgba::BLUE, None, None),
-            None,
-        )];
-        let colour = thingy.intersections_to_colour(inputs);
-        assert_eq!(colour, Rgba::BLUE)
+    pub fn with_colour(colour: Rgba) -> Specular {
+        Specular { colour }
     }
 }

@@ -13,13 +13,9 @@ mod surfaces;
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default().with_inner_size([420.0, 420.0]),
+        viewport: egui::ViewportBuilder::default().with_inner_size([620.0, 620.0]),
         ..Default::default()
     };
-    rayon::ThreadPoolBuilder::new()
-        .num_threads(8)
-        .build_global()
-        .unwrap();
     eframe::run_native(
         "renderer",
         options,
@@ -41,8 +37,8 @@ impl Default for RenderApp {
     // runs once at the start
     fn default() -> Self {
         // these are the wrong way round teehee
-        let width = 400;
-        let height = 400;
+        let width = 600;
+        let height = 600;
 
         // make the buffer
         let row = (0..width)
@@ -66,8 +62,9 @@ impl Default for RenderApp {
             buffer,
             camera,
             //scene: Scene::from_csv(String::from("blender/test.csv")),
-            scene: Scene::pondering_orbs(),
-            static_frames: 5,
+            //scene: Scene::pondering_orbs(),
+            scene: Scene::from_json("jsons/ci.json"),
+            static_frames: 10,
         }
     }
 }

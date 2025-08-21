@@ -5,7 +5,7 @@ use crate::{
     renderer,
 };
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct PointLight {
     origin: nalgebra::Vector3<f32>,
     intensity: f32,

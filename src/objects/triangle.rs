@@ -1,9 +1,12 @@
+use std::sync::Arc;
+
 use eframe::egui::Rgba;
 use nalgebra::Vector3;
 
 use crate::{
     intersect::{Intersect, Intersection, TestIntersectionResult},
     objects::plane::Plane,
+    surfaces::Surface,
 };
 
 #[derive(Clone, Debug)]
@@ -23,6 +26,19 @@ impl Triangle {
         Triangle {
             inner_plane: Plane::from_3_points(A, B, C),
             colour,
+        }
+    }
+
+    #[allow(non_snake_case)]
+    pub fn from_3_points_and_surface(
+        A: &Vector3<f32>,
+        B: &Vector3<f32>,
+        C: &Vector3<f32>,
+        surface: Arc<dyn Surface>,
+    ) -> Triangle {
+        Triangle {
+            inner_plane: Plane::from_3_points_and_surface(A, B, C, surface),
+            colour: Rgba::BLACK,
         }
     }
 }

@@ -9,6 +9,7 @@ use crate::{
     surfaces::{diffuse::Diffuse, Surface},
 };
 
+#[derive(Debug)]
 pub struct Quad {
     inner_plane: Plane,
     surface: Arc<dyn Surface>,
@@ -21,7 +22,21 @@ impl Quad {
             inner_plane: Plane::from_3_points(A, B, C),
             surface: Arc::new(Diffuse {
                 colour: Rgba::from_gray(0.5),
+                samples: 3,
             }),
+        }
+    }
+
+    #[allow(non_snake_case)]
+    pub fn from_3_points_and_surface(
+        A: &Vector3<f32>,
+        B: &Vector3<f32>,
+        C: &Vector3<f32>,
+        surface: Arc<dyn Surface>,
+    ) -> Quad {
+        Quad {
+            inner_plane: Plane::from_3_points(A, B, C),
+            surface,
         }
     }
 }

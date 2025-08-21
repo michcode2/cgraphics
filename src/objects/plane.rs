@@ -38,7 +38,10 @@ impl Plane {
             k,
             origin: A.clone_owned(),
             inverse: simul_eq.try_inverse(),
-            surface: Arc::new(diffuse::Diffuse { colour: Rgba::BLUE }),
+            surface: Arc::new(diffuse::Diffuse {
+                colour: Rgba::BLUE,
+                samples: 3,
+            }),
         }
     }
 

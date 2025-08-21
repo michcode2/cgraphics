@@ -9,7 +9,7 @@ use crate::{
     surfaces::{specular::Specular, Surface},
 };
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Sphere {
     pub origin: nalgebra::Vector3<f32>,
     pub radius: f32,

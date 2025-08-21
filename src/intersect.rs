@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, sync::Arc};
+use std::{cmp::Ordering, fmt::Debug, sync::Arc};
 
 use eframe::egui::Rgba;
 
@@ -25,7 +25,7 @@ impl Ord for TestIntersectionResult {
 
 impl Eq for TestIntersectionResult {}
 
-pub trait Intersect: Send + Sync {
+pub trait Intersect: Send + Sync + Debug {
     fn test_intersection(&self, ray: &Ray, incoming_colour: Rgba) -> TestIntersectionResult;
 }
 

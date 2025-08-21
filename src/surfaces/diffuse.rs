@@ -10,6 +10,7 @@ use crate::{common_maths::maths, renderer::Ray, surfaces::Surface};
 #[derive(Copy, Clone, Debug)]
 pub struct Diffuse {
     pub colour: Rgba,
+    pub samples: usize,
 }
 impl Surface for Diffuse {
     fn get_value(&self, _: Rgba) -> epaint::Rgba {
@@ -18,7 +19,7 @@ impl Surface for Diffuse {
 
     fn request_rays(&self, normal_ray: &Ray, incoming_ray: &Ray) -> Vec<Ray> {
         let reflected = maths::reflected_ray(normal_ray, incoming_ray);
-        (0..50)
+        (0..self.samples)
             .into_iter()
             .map(|_| {
                 Ray::new(
@@ -50,5 +51,8 @@ impl Diffuse {
         let mut return_val = Vector3::new(input.x * scale_x, input.y * scale_y, input.z * scale_z);
         return_val.scale_mut(return_val.norm() / length);
         return_val
+    }
+    pub fn new(colour: Rgba, samples: usize) -> Diffuse {
+        Diffuse { colour, samples }
     }
 }
